@@ -1,0 +1,37 @@
+version: "3.9"
+
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: ./app
+    volumes:
+      - ./app:/code
+    entrypoint: gunicorn messenger_project.wsgi:application --bind 0.0.0.0:8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - migrations
+  migrations:
+    build: ./app
+    volumes:
+      - ./app:/code
+    entrypoint: bash -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput"
+    depends_on:
+      - db
+  nginx:
+    build: ./nginx
+    ports:
+      - "1337:80"
+    depends_on:
+      - web
