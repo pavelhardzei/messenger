@@ -4,4 +4,5 @@ WORKDIR /opt/
 COPY . /opt/
 RUN python -m pip install --upgrade pip
 RUN pip install poetry
-RUN poetry install
+RUN poetry config virtualenvs.create false --local
+RUN poetry install -n
