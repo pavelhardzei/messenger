@@ -15,7 +15,7 @@ services:
   web:
     build: ./app
     volumes:
-      - ./app:/code
+      - ./app:/opt
     entrypoint: gunicorn messenger_project.wsgi:application --bind 0.0.0.0:8000 --reload
     ports:
       - "8000:8000"
@@ -25,7 +25,7 @@ services:
   migrations:
     build: ./app
     volumes:
-      - ./app:/code
+      - ./app:/opt
     entrypoint: bash -c "sleep 5 && python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput"
     depends_on:
       - db
