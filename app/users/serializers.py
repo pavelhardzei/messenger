@@ -70,7 +70,7 @@ class TokenSerializer(serializers.Serializer):
         user_name = attrs.get('user_name')
         password = attrs.get('password')
 
-        if email and user_name or not password or not email and not user_name:
+        if not (email or user_name) or not password:
             raise ValidationError({'error_message': 'Must include email + pwd or user_name + pwd'})
 
         if email:
@@ -87,9 +87,3 @@ class TokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
-
-    def create(self, validated_data):
-        super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        super().update(instance, validated_data)
