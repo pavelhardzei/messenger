@@ -1,7 +1,7 @@
-from .models import UserProfile
-from .serializers import UserSerializer, TokenSerializer, PasswordSerializer, UpdateUserSerializer
+from users.models import UserProfile
+from users.serializers import UserSerializer, TokenSerializer, PasswordSerializer, UpdateUserSerializer
 from rest_framework import generics, status, permissions
-from .permissions import IsAdminOrOwner
+from users.permissions import IsAdminOrOwner
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
