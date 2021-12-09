@@ -1,10 +1,11 @@
-from users.models import UserProfile
-from users.serializers import UserSerializer, TokenSerializer, PasswordSerializer, UpdateUserSerializer
-from rest_framework import generics, status, permissions
-from users.permissions import IsAdminOrOwner
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from users.models import UserProfile
+from users.permissions import IsAdminOrOwner
+from users.serializers import (PasswordSerializer, TokenSerializer,
+                               UpdateUserSerializer, UserSerializer)
 
 
 class UserSignUp(generics.CreateAPIView):

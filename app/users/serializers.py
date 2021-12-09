@@ -1,10 +1,11 @@
+import datetime
+
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.views import Token
+from rest_framework.exceptions import ValidationError
 from users.models import UserProfile
-import datetime
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
