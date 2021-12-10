@@ -9,7 +9,7 @@ class RoomList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
-        return Room.objects.prefetch_related('users').filter(users__user=self.request.user)
+        return Room.objects.prefetch_related('users', 'users__user').filter(users__user=self.request.user)
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
