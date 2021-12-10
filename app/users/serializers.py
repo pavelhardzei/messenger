@@ -14,7 +14,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         fields = ('email', 'user_name', 'full_name', 'date_of_birth')
 
     def validate_date_of_birth(self, value):
-        if (datetime.date.today() - datetime.datetime.strptime(str(value), '%Y-%m-%d').date()).days < 0:
+        date_of_birth = datetime.datetime.strptime(str(value), '%Y-%m-%d').date()
+        if (datetime.date.today() - date_of_birth).days < 0:
             raise ValidationError({'error_message': 'Invalid age'})
         return value
 
