@@ -5,6 +5,8 @@ from users.models import UserProfile
 class Room(models.Model):
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=100)
+    open = models.BooleanField(default=True)
+    private = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
