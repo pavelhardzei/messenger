@@ -18,8 +18,8 @@ class RoomUser(models.Model):
         moderator = ('moderator', 'MODERATOR')
         owner = ('owner', 'OWNER')
 
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='users')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='rooms')
     role = models.CharField(max_length=15, choices=Role.choices)
 
     def __str__(self):
