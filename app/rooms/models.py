@@ -10,7 +10,7 @@ class Room(models.Model):
 
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=100)
-    root_type = models.CharField(max_length=15, choices=RootType.choices, default=RootType.open)
+    room_type = models.CharField(max_length=15, choices=RootType.choices, default=RootType.open)
 
     def __str__(self):
         return self.title
