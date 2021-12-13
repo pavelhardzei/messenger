@@ -59,4 +59,4 @@ class ChangePassword(generics.UpdateAPIView):
         return super().get_object()
 
     def patch(self, request, *args, **kwargs):
-        return Response({'detail': f'Method "PATCH" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'detail': 'Method "PATCH" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
