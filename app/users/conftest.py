@@ -25,7 +25,7 @@ def api_client(django_db_blocker):
 @pytest.fixture(scope='module')
 def user1(django_db_blocker):
     with django_db_blocker.unblock():
-        yield UserProfile.objects.create_user('test@test1.org', 'test1', 'TEST1', '2000-01-01', 'testing321')
+        yield UserProfile.objects.create_user('test1@test.org', 'test1', 'TEST1', '2000-01-01', 'testing321')
 
 
 @pytest.fixture(scope='module')
