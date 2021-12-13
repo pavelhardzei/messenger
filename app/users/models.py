@@ -1,7 +1,8 @@
-from django.db import models
+import datetime
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models
 from rest_framework.exceptions import ValidationError
-from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
@@ -41,7 +42,7 @@ class UserProfile(AbstractBaseUser):
     user_name = models.CharField(max_length=30, unique=True)
     full_name = models.CharField(max_length=50)
     date_of_birth = models.DateField()
-    date_joined = models.DateField(default=timezone.now)
+    date_joined = models.DateField(default=datetime.date.today)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
