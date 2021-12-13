@@ -26,5 +26,8 @@ class RoomUser(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='rooms')
     role = models.CharField(max_length=15, choices=Role.choices)
 
+    class Meta:
+        unique_together = ('room', 'user')
+
     def __str__(self):
         return f'Room: {self.room}, user: {self.user}'

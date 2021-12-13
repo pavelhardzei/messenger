@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import generics, permissions
 from rooms.models import Room, RoomUser
+from rooms.permissions import IsMember
 from rooms.serializers import RoomSerializer, RoomUserSerializer
 
 
@@ -22,3 +23,9 @@ class RoomList(generics.ListCreateAPIView):
         room_user.save()
 
         return response
+
+
+class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Room.objects.prefetch_related('users', 'users__user').all()
+    serializer_class = RoomSerializer
+    permission_classes = (IsMember, )
