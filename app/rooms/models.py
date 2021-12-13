@@ -3,14 +3,14 @@ from users.models import UserProfile
 
 
 class Room(models.Model):
-    class RootType(models.TextChoices):
+    class RoomType(models.TextChoices):
         open = ('open', 'OPEN')
         closed = ('closed', 'CLOSED')
         private = ('private', 'PRIVATE')
 
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=100)
-    room_type = models.CharField(max_length=15, choices=RootType.choices, default=RootType.open)
+    room_type = models.CharField(max_length=15, choices=RoomType.choices, default=RoomType.open)
 
     def __str__(self):
         return self.title
