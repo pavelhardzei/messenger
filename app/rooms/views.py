@@ -4,7 +4,7 @@ from django.db import transaction
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rooms.models import Room, RoomUser
-from rooms.permissions import IsHigherRole, IsMember
+from rooms.permissions import IsHigherRole, IsMember, IsOwner
 from rooms.serializers import RoomSerializer, RoomUserSerializer
 
 
@@ -87,4 +87,22 @@ class RemoveUser(generics.CreateAPIView):
         obj.delete()
 
         serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+
+class SetRole(generics.CreateAPIView):
+    serializer_class = RoomUserSerializer
+    permission_classes = (IsOwner, )
+
+    def post(self, request, *args, **kwargs):
+        obj = get_object_or_404_with_message(RoomUser, 'No such user', room=request.data['room'],
+                                             user=request.user)
+        self.check_object_permissions(request, obj)
+
+        instance = get_object_or_404_with_message(RoomUser, 'No such user', room=request.data['room'],
+                                                  user=request.data['user'])
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
         return Response(serializer.data)

@@ -21,3 +21,8 @@ class IsHigherRole(permissions.BasePermission):
         room_user = get_object_or_404_with_message(RoomUser, 'No such user', room=obj.room, user=request.user)
 
         return RoomUser.Role.values.index(room_user.role) > RoomUser.Role.values.index(obj.role)
+
+
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (request.user.is_superuser or obj.role == RoomUser.Role.owner) and obj.user != request.user
