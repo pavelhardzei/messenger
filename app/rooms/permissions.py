@@ -1,4 +1,4 @@
-from base.shortcuts import get_object_or_404_with_message
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from rooms.models import RoomUser
 
@@ -18,7 +18,7 @@ class IsMember(permissions.BasePermission):
 
 class IsHigherRole(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        room_user = get_object_or_404_with_message(RoomUser, 'No such user', room=obj.room, user=request.user)
+        room_user = get_object_or_404(RoomUser, room=obj.room, user=request.user)
 
         return RoomUser.Role.values.index(room_user.role) > RoomUser.Role.values.index(obj.role)
 

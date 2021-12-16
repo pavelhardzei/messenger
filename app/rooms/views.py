@@ -1,6 +1,6 @@
 from base.exceptions import LogicError
-from base.shortcuts import get_object_or_404_with_message
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rooms.models import Room, RoomUser
@@ -26,8 +26,7 @@ class RoomList(generics.ListCreateAPIView):
         for user_id in users:
             self.create_room_user(room_id, user_id, RoomUser.Role.member)
 
-        room = get_object_or_404_with_message(Room.objects.prefetch_related('users', 'users__user'), 'No such room',
-                                              pk=room_id)
+        room = get_object_or_404(Room.objects.prefetch_related('users', 'users__user'), pk=room_id)
 
         return Response(RoomSerializer(room).data)
 
@@ -48,7 +47,7 @@ class EnterRoom(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room = get_object_or_404_with_message(Room, 'Room not found', pk=request.data['room'])
+        room = get_object_or_404(Room, pk=request.data['room'])
         if room.room_type != Room.RoomType.open:
             raise LogicError('Room is not open', status.HTTP_400_BAD_REQUEST)
 
@@ -65,8 +64,7 @@ class LeaveRoom(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room_user = get_object_or_404_with_message(RoomUser, 'No user in this room', room=request.data['room'],
-                                                   user=self.request.user)
+        room_user = get_object_or_404(RoomUser, room=request.data['room'], user=self.request.user)
         if room_user.role == RoomUser.Role.owner:
             raise LogicError('Owner cannot leave room without deleting it', status.HTTP_400_BAD_REQUEST)
 
@@ -81,8 +79,7 @@ class RemoveUser(generics.CreateAPIView):
     permission_classes = (IsHigherRole, )
 
     def post(self, request, *args, **kwargs):
-        obj = get_object_or_404_with_message(RoomUser, 'No user in this room', room=request.data['room'],
-                                             user=request.data['user'])
+        obj = get_object_or_404(RoomUser, room=request.data['room'], user=request.data['user'])
         self.check_object_permissions(request, obj)
         obj.delete()
 
@@ -95,8 +92,7 @@ class SetRole(generics.CreateAPIView):
     permission_classes = (IsOwner, )
 
     def post(self, request, *args, **kwargs):
-        instance = get_object_or_404_with_message(RoomUser, 'No such user', room=request.data['room'],
-                                                  user=request.data['user'])
+        instance = get_object_or_404(RoomUser, room=request.data['room'], user=request.data['user'])
         self.check_object_permissions(request, instance)
 
         serializer = self.get_serializer(instance, data=request.data)
