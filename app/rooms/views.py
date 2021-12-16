@@ -20,12 +20,21 @@ class RoomList(generics.ListCreateAPIView):
         response = super().post(request, *args, **kwargs)
         room_id = response.data['id']
 
-        room_user = RoomUserSerializer(data={'room': room_id, 'user': self.request.user.id,
-                                             'role': RoomUser.Role.owner})
+        self.create_room_user(room_id, request.user.id, RoomUser.Role.owner)
+
+        users = request.data['users']
+        for user_id in users:
+            self.create_room_user(room_id, user_id, RoomUser.Role.member)
+
+        room = get_object_or_404_with_message(Room.objects.prefetch_related('users', 'users__user'), 'No such room',
+                                              pk=room_id)
+
+        return Response(RoomSerializer(room).data)
+
+    def create_room_user(self, room_id, user_id, role):
+        room_user = RoomUserSerializer(data={'room': room_id, 'user': user_id, 'role': role})
         room_user.is_valid(raise_exception=True)
         room_user.save()
-
-        return response
 
 
 class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
