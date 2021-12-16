@@ -28,7 +28,7 @@ class RoomList(generics.ListCreateAPIView):
 
         room = get_object_or_404(Room.objects.prefetch_related('users', 'users__user'), pk=room_id)
 
-        return Response(RoomSerializer(room).data)
+        return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
 
     def create_room_user(self, room_id, user_id, role):
         room_user = RoomUserSerializer(data={'room': room_id, 'user': user_id, 'role': role})
