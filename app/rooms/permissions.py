@@ -25,4 +25,5 @@ class IsHigherRole(permissions.BasePermission):
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (request.user.is_superuser or obj.role == RoomUser.Role.owner) and obj.user != request.user
+        return RoomUser.objects.filter(room=obj.room, user=request.user,
+                                       role=RoomUser.Role.owner).exists() and obj.user != request.user

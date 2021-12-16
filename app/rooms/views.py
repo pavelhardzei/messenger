@@ -95,12 +95,10 @@ class SetRole(generics.CreateAPIView):
     permission_classes = (IsOwner, )
 
     def post(self, request, *args, **kwargs):
-        obj = get_object_or_404_with_message(RoomUser, 'No such user', room=request.data['room'],
-                                             user=request.user)
-        self.check_object_permissions(request, obj)
-
         instance = get_object_or_404_with_message(RoomUser, 'No such user', room=request.data['room'],
                                                   user=request.data['user'])
+        self.check_object_permissions(request, instance)
+
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
