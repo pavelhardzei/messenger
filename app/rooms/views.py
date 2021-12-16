@@ -4,7 +4,7 @@ from django.db import transaction
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rooms.models import Room, RoomUser
-from rooms.permissions import IsMember
+from rooms.permissions import IsHigherRole, IsMember
 from rooms.serializers import RoomSerializer, RoomUserSerializer
 
 
@@ -65,8 +65,7 @@ class LeaveRoom(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room_user = get_object_or_404_with_message(RoomUser.objects.select_related('room'),
-                                                   'No user in this room', room=request.data['room'],
+        room_user = get_object_or_404_with_message(RoomUser, 'No user in this room', room=request.data['room'],
                                                    user=self.request.user)
         if room_user.role == RoomUser.Role.owner:
             raise LogicError('Owner cannot leave room without deleting it', status.HTTP_400_BAD_REQUEST)
@@ -75,3 +74,17 @@ class LeaveRoom(generics.CreateAPIView):
         room_user.delete()
 
         return Response(response.data)
+
+
+class RemoveUser(generics.CreateAPIView):
+    serializer_class = RoomUserSerializer
+    permission_classes = (IsHigherRole, )
+
+    def post(self, request, *args, **kwargs):
+        obj = get_object_or_404_with_message(RoomUser, 'No user in this room', room=request.data['room'],
+                                             user=request.data['user'])
+        self.check_object_permissions(request, obj)
+        obj.delete()
+
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
