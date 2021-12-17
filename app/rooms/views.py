@@ -5,7 +5,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rooms.models import Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
-from rooms.serializers import RoomSerializer, RoomUserSerializer
+from rooms.serializers import (InvitationSerializer, RoomSerializer,
+                               RoomUserSerializer)
 
 
 class RoomList(generics.ListCreateAPIView):
@@ -100,3 +101,8 @@ class SetRole(generics.CreateAPIView):
         serializer.save()
 
         return Response(serializer.data)
+
+
+class MakeInvitation(generics.CreateAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = (permissions.IsAuthenticated, )

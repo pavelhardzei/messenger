@@ -1,3 +1,6 @@
+import datetime
+import uuid
+
 from django.db import models
 from users.models import UserProfile
 
@@ -31,3 +34,10 @@ class RoomUser(models.Model):
 
     def __str__(self):
         return f'Room: {self.room}, user: {self.user}'
+
+
+class Invitation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='invitations')
+    created = models.DateTimeField(default=datetime.datetime.now)
+    expiration = models.DurationField(default=datetime.timedelta(days=1))
