@@ -9,12 +9,12 @@ class RoomUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'room', 'user', 'role')
 
 
-class ListRoomUserSerializer(serializers.ModelSerializer):
+class ListRoomUserSerializer(RoomUserSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = RoomUser
-        fields = ('user', )
+        fields = ('user', 'role')
 
 
 class RoomSerializer(serializers.ModelSerializer):
