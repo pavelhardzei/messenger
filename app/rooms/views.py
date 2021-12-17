@@ -51,7 +51,7 @@ class EnterRoom(generics.CreateAPIView):
         if room.room_type != Room.RoomType.open:
             raise LogicError('Room is not open', status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(data={**request.data, 'user': self.request.user.id,
+        serializer = self.get_serializer(data={'room': request.data['room'], 'user': self.request.user.id,
                                                'role': RoomUser.Role.member})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
