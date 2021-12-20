@@ -2,6 +2,7 @@ import datetime
 import uuid
 
 from django.db import models
+from django.utils import timezone
 from users.models import UserProfile
 
 
@@ -39,5 +40,5 @@ class RoomUser(models.Model):
 class Invitation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='invitations')
-    created = models.DateTimeField(default=datetime.datetime.now)
+    created = models.DateTimeField(default=timezone.now)
     expiration = models.DurationField(default=datetime.timedelta(days=1))
