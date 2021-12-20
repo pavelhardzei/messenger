@@ -1,12 +1,13 @@
+import datetime
+
 from base.exceptions import LogicError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rooms.models import Room, RoomUser
+from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
-from rooms.serializers import (InvitationSerializer, RoomSerializer,
-                               RoomUserSerializer)
+from rooms.serializers import InvitationSerializer, RoomSerializer, RoomUserSerializer
 
 
 class RoomList(generics.ListCreateAPIView):
@@ -106,3 +107,31 @@ class SetRole(generics.CreateAPIView):
 class MakeInvitation(generics.CreateAPIView):
     serializer_class = InvitationSerializer
     permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        room = get_object_or_404(Room, pk=request.data['room'])
+        if room.room_type == Room.RoomType.closed:
+            return Response('Room is closed', status=status.HTTP_403_FORBIDDEN)
+
+        return super().post(request, *args, **kwargs)
+
+
+class AcceptInvitation(generics.CreateAPIView):
+    serializer_class = RoomUserSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        uuid4 = self.kwargs['uuid4']
+        inv = get_object_or_404(Invitation.objects.select_related('room'), pk=uuid4)
+
+        if datetime.datetime.now() - inv.created.replace(tzinfo=None) > inv.expiration:
+            inv.delete()
+            return Response('Invitation is expired', status=status.HTTP_204_NO_CONTENT)
+
+        serializer = self.get_serializer(data={'room': inv.room.id, 'user': self.request.user.id,
+                                               'role': RoomUser.Role.member})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        inv.delete()
+
+        return Response(serializer.data)
