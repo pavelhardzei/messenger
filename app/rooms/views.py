@@ -109,9 +109,10 @@ class MakeInvitation(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room = get_object_or_404(Room, pk=request.data['room'])
-        if room.room_type == Room.RoomType.closed:
+        if Room.objects.filter(pk=request.data['room'], room_type=Room.RoomType.closed).exists():
             return Response('Room is closed', status=status.HTTP_403_FORBIDDEN)
+        if not RoomUser.objects.filter(room=request.data['room'], user=request.user).exists():
+            return Response('You are not a member', status=status.HTTP_403_FORBIDDEN)
 
         return super().post(request, *args, **kwargs)
 
