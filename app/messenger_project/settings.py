@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'base',
     'users',
     'rooms',
-    'messages'
+    'room_messages'
 ]
 
 MIDDLEWARE = [
