@@ -27,3 +27,9 @@ class MessageSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class ListMessagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ('text', 'sender', 'created_at', 'updated_at')

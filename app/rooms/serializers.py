@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from room_messages.serializers import ListMessagesSerializer
 from rooms.models import Invitation, Room, RoomUser
 from users.serializers import UserSerializer
 
@@ -19,10 +20,11 @@ class ListRoomUserSerializer(RoomUserSerializer):
 
 class RoomSerializer(serializers.ModelSerializer):
     users = ListRoomUserSerializer(read_only=True, many=True)
+    messages = ListMessagesSerializer(read_only=True, many=True)
 
     class Meta:
         model = Room
-        fields = ('id', 'title', 'description', 'room_type', 'users')
+        fields = ('id', 'title', 'description', 'room_type', 'users', 'messages')
 
 
 class InvitationSerializer(serializers.ModelSerializer):
