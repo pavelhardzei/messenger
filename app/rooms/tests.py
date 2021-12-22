@@ -10,8 +10,8 @@ def test_create_room(api_client, user1, user2):
                                               'room_type': 'closed', 'users': (user2.id, )})
     assert response.status_code == status.HTTP_201_CREATED
 
-    assert response.json() == {'id': 1, 'title': 'room1', 'description': 'some info', 'room_type': 'closed',
-                               'messages': [],
+    assert response.json() == {'id': response.json()["id"], 'title': 'room1', 'description': 'some info',
+                               'room_type': 'closed', 'messages': [],
                                'users': [{'user': UserSerializer(user1).data, 'role': RoomUser.Role.owner},
                                          {'user': UserSerializer(user2).data, 'role': RoomUser.Role.member}]}
 
@@ -44,7 +44,8 @@ def test_room_enter_leave(api_client, user3, room_closed, room_open_user1):
     api_client.force_authenticate(user3)
     response = api_client.post('/api/room/enter/', {'room': room_open_user1.room.id})
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {'id': 7, 'room': room_open_user1.room.id, 'user': user3.id, 'role': RoomUser.Role.member}
+    assert response.json() == {'id': response.json()["id"], 'room': room_open_user1.room.id, 'user': user3.id,
+                               'role': RoomUser.Role.member}
 
     response = api_client.post('/api/room/leave/', {'room': room_open_user1.room.id})
     assert response.status_code == status.HTTP_200_OK
