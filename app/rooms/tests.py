@@ -1,19 +1,22 @@
 from rest_framework import status
 from rooms.models import Invitation, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
-from users.serializers import UserSerializer
 
 
 def test_create_room(api_client, user1, user2):
     api_client.force_authenticate(user1)
     response = api_client.post('/api/room/', {'title': 'room1', 'description': 'some info',
-                                              'room_type': 'closed', 'users': (user2.id, )})
+                                              'room_type': 'closed', 'users': (user2.id,)})
     assert response.status_code == status.HTTP_201_CREATED
-
     assert response.json() == {'id': response.json()['id'], 'title': 'room1', 'description': 'some info',
                                'room_type': 'closed', 'messages': [],
-                               'users': [{'user': UserSerializer(user1).data, 'role': RoomUser.Role.owner},
-                                         {'user': UserSerializer(user2).data, 'role': RoomUser.Role.member}]}
+                               'users': [
+                                   {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
+                                             'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
+                                             'date_joined': f'{user1.date_joined}'}, 'role': RoomUser.Role.owner},
+                                   {'user': {'id': user2.id, 'email': user2.email, 'user_name': user2.user_name,
+                                             'full_name': user2.full_name, 'date_of_birth': f'{user2.date_of_birth}',
+                                             'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}]}
 
 
 def test_list_room(api_client, room_open_user1, room_open_user2):
@@ -25,10 +28,14 @@ def test_list_room(api_client, room_open_user1, room_open_user2):
     user1, user2 = room_open_user1.user, room_open_user2.user
     assert response.json() == [{'id': room_open_user1.room.id, 'title': room_open_user1.room.title,
                                 'description': room_open_user1.room.description,
-                                'room_type': room_open_user1.room.room_type,
-                                'messages': [],
-                                'users': [{'user': UserSerializer(user1).data, 'role': RoomUser.Role.owner},
-                                          {'user': UserSerializer(user2).data, 'role': RoomUser.Role.member}]}]
+                                'room_type': room_open_user1.room.room_type, 'messages': [],
+                                'users': [
+                                    {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
+                                              'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
+                                              'date_joined': f'{user1.date_joined}'}, 'role': RoomUser.Role.owner},
+                                    {'user': {'id': user2.id, 'email': user2.email, 'user_name': user2.user_name,
+                                              'full_name': user2.full_name, 'date_of_birth': f'{user2.date_of_birth}',
+                                              'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}]}]
 
 
 def test_room_detail(api_client, room_open_user1):

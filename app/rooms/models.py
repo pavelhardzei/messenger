@@ -15,6 +15,10 @@ class Room(models.Model):
     description = models.CharField(max_length=100)
     room_type = models.CharField(max_length=15, choices=RoomType.choices, default=RoomType.open)
 
+    @property
+    def is_open(self):
+        return self.room_type == self.RoomType.open
+
     def __str__(self):
         return self.title
 
@@ -31,6 +35,10 @@ class RoomUser(models.Model):
 
     class Meta:
         unique_together = ('room', 'user')
+
+    @property
+    def is_owner(self):
+        return self.role == self.Role.owner
 
     def __str__(self):
         return f'Room: {self.room}, user: {self.user}'
