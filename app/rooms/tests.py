@@ -11,6 +11,7 @@ def test_create_room(api_client, user1, user2):
     assert response.status_code == status.HTTP_201_CREATED
 
     assert response.json() == {'id': 1, 'title': 'room1', 'description': 'some info', 'room_type': 'closed',
+                               'messages': [],
                                'users': [{'user': UserSerializer(user1).data, 'role': RoomUser.Role.owner},
                                          {'user': UserSerializer(user2).data, 'role': RoomUser.Role.member}]}
 
@@ -25,6 +26,7 @@ def test_list_room(api_client, room_open_user1, room_open_user2):
     assert response.json() == [{'id': room_open_user1.room.id, 'title': room_open_user1.room.title,
                                 'description': room_open_user1.room.description,
                                 'room_type': room_open_user1.room.room_type,
+                                'messages': [],
                                 'users': [{'user': UserSerializer(user1).data, 'role': RoomUser.Role.owner},
                                           {'user': UserSerializer(user2).data, 'role': RoomUser.Role.member}]}]
 
