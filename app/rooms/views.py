@@ -50,7 +50,7 @@ class EnterRoom(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         room = get_object_or_404(Room, pk=request.data['room'])
-        if room.room_type != Room.RoomType.open:
+        if not room.is_open:
             raise LogicError('Room is not open', status.HTTP_403_FORBIDDEN)
 
         serializer = self.get_serializer(data={'room': request.data['room'], 'user': self.request.user.id,
@@ -67,7 +67,7 @@ class LeaveRoom(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         room_user = get_object_or_404(RoomUser, room=request.data['room'], user=self.request.user)
-        if room_user.role == RoomUser.Role.owner:
+        if room_user.is_owner:
             raise LogicError('Owner cannot leave room without deleting it', status.HTTP_403_FORBIDDEN)
 
         response = self.get_serializer(room_user)
