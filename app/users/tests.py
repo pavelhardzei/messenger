@@ -17,7 +17,9 @@ def test_detail(api_client, user1, user2):
     api_client.force_authenticate(user1)
     response = api_client.get('/api/user/me/')
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.json()) == {'id', 'email', 'user_name', 'full_name', 'date_of_birth', 'date_joined'}
+    assert response.json() == {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
+                               'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
+                               'date_joined': f'{user1.date_joined}'}
 
     response = api_client.patch('/api/user/me/')
     assert response.status_code == status.HTTP_200_OK
