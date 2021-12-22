@@ -1,8 +1,12 @@
 from unittest.mock import patch
 
 import pytest
+from pytest_factoryboy import register
 from rest_framework.test import APIClient
-from users.models import UserProfile
+from users.factories import UserFactory
+
+register(UserFactory, 'user1')
+register(UserFactory, 'user2')
 
 
 @pytest.fixture(autouse=True)
@@ -20,15 +24,3 @@ def check_object_permissions_mock():
 def api_client(django_db_blocker):
     with django_db_blocker.unblock():
         yield APIClient()
-
-
-@pytest.fixture(scope='module')
-def user1(django_db_blocker):
-    with django_db_blocker.unblock():
-        yield UserProfile.objects.create_user('test1@test.org', 'test1', 'TEST1', '2000-01-01', 'testing321')
-
-
-@pytest.fixture(scope='module')
-def user2(django_db_blocker):
-    with django_db_blocker.unblock():
-        yield UserProfile.objects.create_user('test2@test.org', 'test2', 'TEST2', '2000-01-01', 'testing321')
