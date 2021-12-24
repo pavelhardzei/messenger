@@ -1,3 +1,4 @@
+from base.constants import DATETIME_FMT
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework import status
@@ -94,7 +95,7 @@ def test_invitation(api_client, user3, room_open, room_open_user1, room_closed_u
 
     inv = Invitation.objects.all().first()
     assert response.json() == {'id': f'{inv.id}', 'room': room_open_user1.room.id,
-                               'created': f'{inv.created.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}',
+                               'created': f'{inv.created.strftime(DATETIME_FMT)}',
                                'expiration': '1 00:00:00'}
 
     uuid4 = response.json()['id']

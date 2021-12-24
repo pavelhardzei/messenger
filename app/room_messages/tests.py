@@ -1,3 +1,4 @@
+from base.constants import DATETIME_FMT
 from rest_framework import status
 from room_messages.models import Message
 from room_messages.permissions import IsSender
@@ -11,8 +12,8 @@ def test_message_create(api_client, room_user1, user3):
     msg = Message.objects.all().first()
     assert response.json() == {'id': response.json()['id'], 'text': 'some text', 'room': room_user1.room.id,
                                'sender': room_user1.user.id,
-                               'created_at': f'{msg.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}',
-                               'updated_at': f'{msg.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}'}
+                               'created_at': f'{msg.created_at.strftime(DATETIME_FMT)}',
+                               'updated_at': f'{msg.updated_at.strftime(DATETIME_FMT)}'}
 
     api_client.force_authenticate(user3)
     response = api_client.post('/api/message/', {'text': 'some text', 'room': room_user1.room.id})
@@ -27,8 +28,8 @@ def test_message_detail(api_client, message_user1):
     msg = Message.objects.all().first()
     assert response.json() == {'id': response.json()['id'], 'text': 'updated text', 'room': message_user1.room.id,
                                'sender': message_user1.sender.id,
-                               'created_at': f'{msg.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}',
-                               'updated_at': f'{msg.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")}'}
+                               'created_at': f'{msg.created_at.strftime(DATETIME_FMT)}',
+                               'updated_at': f'{msg.updated_at.strftime(DATETIME_FMT)}'}
 
 
 def test_permissions(rf, message_user1, user2):
