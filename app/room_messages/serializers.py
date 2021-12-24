@@ -17,7 +17,7 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_fields(self, *args, **kwargs):
         fields = super().get_fields()
         request = self.context.get('request', None)
-        if request and (request.method == 'PUT' or request.method == 'PATCH'):
+        if request and (request.method in ('PUT', 'PATCH')):
             fields['room'].read_only = True
         return fields
 
