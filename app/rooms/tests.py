@@ -1,3 +1,5 @@
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework import status
 from rooms.models import Invitation, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
@@ -138,3 +140,28 @@ def test_permissions(rf, room_open_user1, room_open_user2):
                                    'role': RoomUser.Role.member})
     rf.user = room_open_user2.user
     assert not permission.has_object_permission(rf, None, room_open_user1)
+
+
+def test_get_room_detail_db_calls(api_client, user1, room_open_user1):
+    api_client.force_authenticate(user1)
+
+    with CaptureQueriesContext(connection) as query_context:
+        response = api_client.get(f'/api/room/{room_open_user1.room.id}/')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(query_context) == 3
+
+
+def test_get_room_list_db_calls(api_client, user1, room_user_factory):
+    api_client.force_authenticate(user1)
+
+    room_user_factory.create_batch(10, user=user1)
+    with CaptureQueriesContext(connection) as query_context:
+        response = api_client.get('/api/room/')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(query_context) == 3
+
+    room_user_factory.create_batch(20, user=user1)
+    with CaptureQueriesContext(connection) as query_context:
+        response = api_client.get('/api/room/')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(query_context) == 3
