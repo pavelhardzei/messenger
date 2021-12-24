@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rooms.models import Room, RoomUser
+from rooms.models import Invitation, Room, RoomUser
 from users.serializers import UserSerializer
 
 
@@ -9,12 +9,12 @@ class RoomUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'room', 'user', 'role')
 
 
-class ListRoomUserSerializer(serializers.ModelSerializer):
+class ListRoomUserSerializer(RoomUserSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = RoomUser
-        fields = ('user', )
+        fields = ('user', 'role')
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -23,3 +23,11 @@ class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ('id', 'title', 'description', 'room_type', 'users')
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ('id', 'room', 'created', 'expiration')
+
+        extra_kwargs = {'created': {'read_only': True}}

@@ -7,9 +7,5 @@ class LogicError(APIException):
     default_detail = 'A server error occurred.'
 
     def __init__(self, detail=None, status_code=None):
-        if status_code:
-            self.status_code = status_code
-        if detail:
-            self.detail = {'error_message': detail}
-        else:
-            self.detail = {'error_message': self.default_detail}
+        self.status_code = status_code or self.status_code
+        self.detail = {'error_message': detail or self.default_detail}
