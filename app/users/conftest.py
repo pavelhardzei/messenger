@@ -21,6 +21,5 @@ def check_object_permissions_mock():
 
 
 @pytest.fixture(scope='module')
-def api_client(django_db_blocker):
-    with django_db_blocker.unblock():
-        yield APIClient()
+def api_client():
+    yield APIClient()
