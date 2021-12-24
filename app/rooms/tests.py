@@ -147,7 +147,7 @@ def test_get_room_detail_db_calls(api_client, user1, room_open_user1):
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get(f'/api/room/{room_open_user1.room.id}/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
 
 
 def test_get_room_list_db_calls(api_client, user1, room_user_factory):
@@ -157,10 +157,10 @@ def test_get_room_list_db_calls(api_client, user1, room_user_factory):
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get('/api/room/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
 
     room_user_factory.create_batch(20, user=user1)
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get('/api/room/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
