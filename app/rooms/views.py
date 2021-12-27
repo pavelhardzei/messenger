@@ -44,11 +44,11 @@ class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsMember, )
 
 
-class EnterRoom(generics.CreateAPIView):
+class EnterRoom(generics.UpdateAPIView):
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         room = get_object_or_404(Room, pk=self.kwargs['pk'])
         if not room.is_open:
             raise LogicError('Room is not open', status.HTTP_403_FORBIDDEN)
@@ -56,9 +56,12 @@ class EnterRoom(generics.CreateAPIView):
         serializer = self.get_serializer(data={'room': self.kwargs['pk'], 'user': self.request.user.id,
                                                'role': RoomUser.Role.member})
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        serializer.save()
 
         return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        return Response({'detail': 'Method \"PATCH\" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class LeaveRoom(generics.CreateAPIView):

@@ -47,20 +47,24 @@ def test_room_detail(api_client, room_open_user1):
     response = api_client.get(f'/api/room/{room_open_user1.room.id}/')
     assert response.status_code == status.HTTP_200_OK
 
+
+def test_room_update(api_client, room_open_user1):
+    api_client.force_authenticate(room_open_user1.user)
     response = api_client.patch(f'/api/room/{room_open_user1.room.id}/', {'title': 'room', 'description': 'new info'})
     assert response.status_code == status.HTTP_200_OK
 
 
 def test_room_enter_leave(api_client, user3, room_closed, room_open_user1):
     api_client.force_authenticate(user3)
-    response = api_client.post(f'/api/room/{room_open_user1.room.id}/enter/')
+    response = api_client.put(f'/api/room/{room_open_user1.room.id}/enter/')
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {'id': 7, 'room': room_open_user1.room.id, 'user': user3.id, 'role': RoomUser.Role.member}
+    assert response.json() == {'id': response.json()['id'], 'room': room_open_user1.room.id, 'user': user3.id,
+                               'role': RoomUser.Role.member}
 
     response = api_client.post(f'/api/room/{room_open_user1.room.id}/leave/')
     assert response.status_code == status.HTTP_200_OK
 
-    response = api_client.post(f'/api/room/{room_closed.id}/enter/')
+    response = api_client.put(f'/api/room/{room_closed.id}/enter/')
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
     api_client.force_authenticate(room_open_user1.user)
