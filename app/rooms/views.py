@@ -49,11 +49,11 @@ class EnterRoom(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room = get_object_or_404(Room, pk=request.data['room'])
+        room = get_object_or_404(Room, pk=self.kwargs['pk'])
         if not room.is_open:
             raise LogicError('Room is not open', status.HTTP_403_FORBIDDEN)
 
-        serializer = self.get_serializer(data={'room': request.data['room'], 'user': self.request.user.id,
+        serializer = self.get_serializer(data={'room': self.kwargs['pk'], 'user': self.request.user.id,
                                                'role': RoomUser.Role.member})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -66,7 +66,7 @@ class LeaveRoom(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        room_user = get_object_or_404(RoomUser, room=request.data['room'], user=self.request.user)
+        room_user = get_object_or_404(RoomUser, room=self.kwargs['pk'], user=self.request.user)
         if room_user.is_owner:
             raise LogicError('Owner cannot leave room without deleting it', status.HTTP_403_FORBIDDEN)
 
@@ -76,17 +76,15 @@ class LeaveRoom(generics.CreateAPIView):
         return Response(response.data)
 
 
-class RemoveUser(generics.CreateAPIView):
+class RemoveUser(generics.DestroyAPIView):
     serializer_class = RoomUserSerializer
     permission_classes = (IsHigherRole, )
 
-    def post(self, request, *args, **kwargs):
-        obj = get_object_or_404(RoomUser, room=request.data['room'], user=request.data['user'])
-        self.check_object_permissions(request, obj)
-        obj.delete()
+    def get_object(self):
+        obj = get_object_or_404(RoomUser, room=self.kwargs['room_pk'], user=self.kwargs['user_pk'])
+        self.check_object_permissions(self.request, obj)
 
-        serializer = self.get_serializer(obj)
-        return Response(serializer.data)
+        return obj
 
 
 class SetRole(generics.CreateAPIView):
@@ -94,10 +92,10 @@ class SetRole(generics.CreateAPIView):
     permission_classes = (IsOwner, )
 
     def post(self, request, *args, **kwargs):
-        instance = get_object_or_404(RoomUser, room=request.data['room'], user=request.data['user'])
+        instance = get_object_or_404(RoomUser, room=self.kwargs['room_pk'], user=self.kwargs['user_pk'])
         self.check_object_permissions(request, instance)
 
-        serializer = self.get_serializer(instance, data=request.data)
+        serializer = self.get_serializer(instance, data={'role': request.data['role']}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
