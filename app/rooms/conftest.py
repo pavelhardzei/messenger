@@ -1,8 +1,5 @@
-from unittest.mock import patch
-
-import pytest
+from base.conftest import api_client, check_object_permissions_mock, enable_db_access_for_all_tests
 from pytest_factoryboy import LazyFixture, register
-from rest_framework.test import APIClient
 from rooms.factories import RoomFactory, RoomUserFactory
 from rooms.models import Room, RoomUser
 from users.factories import UserFactory
@@ -18,19 +15,3 @@ register(RoomUserFactory, 'room_open_user1', room=LazyFixture('room_open'), user
 register(RoomUserFactory, 'room_closed_user1', room=LazyFixture('room_closed'), user=LazyFixture('user1'))
 register(RoomUserFactory, 'room_open_user2', room=LazyFixture('room_open'), user=LazyFixture('user2'),
          role=RoomUser.Role.member)
-
-
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
-
-
-@pytest.fixture(autouse=True)
-def check_object_permissions_mock():
-    with patch('rest_framework.views.APIView.check_object_permissions'):
-        yield True
-
-
-@pytest.fixture(scope='module')
-def api_client():
-    yield APIClient()
