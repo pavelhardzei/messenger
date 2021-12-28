@@ -3,7 +3,7 @@ import datetime
 from base.exceptions import LogicError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
@@ -44,39 +44,43 @@ class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsMember, )
 
 
-class EnterRoom(generics.UpdateAPIView):
-    serializer_class = RoomUserSerializer
+class EnterRoom(views.APIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def put(self, request, *args, **kwargs):
+        room_user = RoomUser.objects.filter(room=self.kwargs['pk'], user=request.user.id).first()
+        if room_user:
+            return Response(RoomUserSerializer(room_user).data)
+
         room = get_object_or_404(Room, pk=self.kwargs['pk'])
         if not room.is_open:
             raise LogicError('Room is not open', status.HTTP_403_FORBIDDEN)
 
-        serializer = self.get_serializer(data={'room': self.kwargs['pk'], 'user': self.request.user.id,
-                                               'role': RoomUser.Role.member})
+        serializer = RoomUserSerializer(data={'room': self.kwargs['pk'], 'user': request.user.id,
+                                              'role': RoomUser.Role.member})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(serializer.data)
 
-    def patch(self, request, *args, **kwargs):
-        return Response({'detail': 'Method \"PATCH\" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
-class LeaveRoom(generics.CreateAPIView):
+class LeaveRoom(generics.DestroyAPIView):
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
-    def post(self, request, *args, **kwargs):
-        room_user = get_object_or_404(RoomUser, room=self.kwargs['pk'], user=self.request.user)
-        if room_user.is_owner:
+    def get_object(self):
+        obj = get_object_or_404(RoomUser, room=self.kwargs['pk'], user=self.request.user)
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_owner:
             raise LogicError('Owner cannot leave room without deleting it', status.HTTP_403_FORBIDDEN)
 
-        response = self.get_serializer(room_user)
-        room_user.delete()
-
-        return Response(response.data)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RemoveUser(generics.DestroyAPIView):
