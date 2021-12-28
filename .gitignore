@@ -8,3 +8,5 @@ migrations/
 static/
 
 *.env
+
+pyrightconfig.json

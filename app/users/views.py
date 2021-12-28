@@ -4,8 +4,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
-from users.serializers import (PasswordSerializer, TokenSerializer,
-                               UpdateUserSerializer, UserSerializer)
+from users.serializers import PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserSerializer
 
 
 class UserSignUp(generics.CreateAPIView):
@@ -59,4 +58,4 @@ class ChangePassword(generics.UpdateAPIView):
         return super().get_object()
 
     def patch(self, request, *args, **kwargs):
-        return Response({'detail': f'Method "PATCH" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'detail': 'Method "PATCH" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
