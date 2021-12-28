@@ -49,3 +49,7 @@ class Invitation(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='invitations')
     created = models.DateTimeField(default=datetime.datetime.utcnow)
     expiration = models.DurationField(default=datetime.timedelta(days=1))
+
+    @property
+    def expired(self):
+        return datetime.datetime.now() - self.created.replace(tzinfo=None) > self.expiration

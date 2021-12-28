@@ -57,7 +57,7 @@ def test_room_update(api_client, room_open_user1):
 def test_room_enter_leave(api_client, user3, room_closed, room_open_user1):
     api_client.force_authenticate(user3)
     response = api_client.put(f'/api/room/{room_open_user1.room.id}/enter/')
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {'id': response.json()['id'], 'room': room_open_user1.room.id, 'user': user3.id,
                                'role': RoomUser.Role.member}
 
@@ -80,8 +80,8 @@ def test_remove_user(api_client, room_open_user1, room_open_user2):
 
 def test_set_role(api_client, room_open_user1, room_open_user2):
     api_client.force_authenticate(room_open_user1.user)
-    response = api_client.post(f'/api/room/{room_open_user1.room.id}/user/{room_open_user2.user.id}/role/',
-                               {'role': RoomUser.Role.moderator})
+    response = api_client.put(f'/api/room/{room_open_user1.room.id}/user/{room_open_user2.user.id}/role/',
+                              {'role': RoomUser.Role.moderator})
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -105,6 +105,7 @@ def test_invitation(api_client, user3, room_open, room_open_user1, room_closed_u
     uuid4 = response.json()['id']
     response = api_client.post(f'/api/room/invitation/{uuid4}/')
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'non_field_errors': ['The fields room, user must make a unique set.']}
 
     api_client.force_authenticate(user3)
     response = api_client.post(f'/api/room/invitation/{uuid4}/')
