@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework import status
@@ -11,7 +13,7 @@ def test_create_room(api_client, user1, user2):
                                               'room_type': 'closed', 'users': (user2.id,)})
     assert response.status_code == status.HTTP_201_CREATED
 
-    assert response.json() == {'id': response.json()['id'], 'title': 'room1', 'description': 'some info',
+    assert response.json() == {'id': ANY, 'title': 'room1', 'description': 'some info',
                                'room_type': 'closed', 'messages': [],
                                'users': [
                                    {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
@@ -55,7 +57,7 @@ def test_room_enter_leave(api_client, user1, user3, room_open, room_closed, room
     api_client.force_authenticate(user3)
     response = api_client.put(f'/api/room/{room_open.id}/enter/')
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {'id': response.json()['id'], 'room': room_open.id, 'user': user3.id,
+    assert response.json() == {'id': ANY, 'room': room_open.id, 'user': user3.id,
                                'role': RoomUser.Role.member}
 
     response = api_client.delete(f'/api/room/{room_open.id}/leave/')
