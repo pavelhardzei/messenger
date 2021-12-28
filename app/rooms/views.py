@@ -28,7 +28,7 @@ class RoomList(generics.ListCreateAPIView):
         for user_id in users:
             self.create_room_user(room_id, user_id, RoomUser.Role.member)
 
-        room = get_object_or_404(Room.objects.prefetch_related('users', 'users__user'), pk=room_id)
+        room = get_object_or_404(self.get_queryset(), pk=room_id)
 
         return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
 
@@ -61,7 +61,7 @@ class EnterRoom(views.APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LeaveRoom(generics.DestroyAPIView):
@@ -94,15 +94,14 @@ class RemoveUser(generics.DestroyAPIView):
         return obj
 
 
-class SetRole(generics.CreateAPIView):
-    serializer_class = RoomUserSerializer
+class SetRole(views.APIView):
     permission_classes = (IsOwner, )
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         instance = get_object_or_404(RoomUser, room=self.kwargs['room_pk'], user=self.kwargs['user_pk'])
         self.check_object_permissions(request, instance)
 
-        serializer = self.get_serializer(instance, data={'role': request.data['role']}, partial=True)
+        serializer = RoomUserSerializer(instance, data={'role': request.data['role']}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -130,9 +129,9 @@ class AcceptInvitation(generics.CreateAPIView):
         uuid4 = self.kwargs['uuid4']
         inv = get_object_or_404(Invitation.objects.select_related('room'), pk=uuid4)
 
-        if datetime.datetime.now() - inv.created.replace(tzinfo=None) > inv.expiration:
+        if inv.expired:
             inv.delete()
-            return Response('Invitation is expired', status=status.HTTP_204_NO_CONTENT)
+            return Response({'error_message': 'Invitation is expired'}, status=status.HTTP_204_NO_CONTENT)
 
         serializer = self.get_serializer(data={'room': inv.room.id, 'user': self.request.user.id,
                                                'role': RoomUser.Role.member})
