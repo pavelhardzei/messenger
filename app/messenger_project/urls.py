@@ -20,5 +20,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path('api/', include('messenger_project.api_urls')),
+    path('chat/', include('chat.urls')),
     path('admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
