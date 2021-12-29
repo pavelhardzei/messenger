@@ -13,7 +13,7 @@ class RoomList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
-        return Room.objects.prefetch_related('users', 'users__user').filter(users__user=self.request.user)
+        return Room.objects.prefetch_related('users', 'users__user', 'messages').filter(users__user=self.request.user)
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -37,7 +37,7 @@ class RoomList(generics.ListCreateAPIView):
 
 
 class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Room.objects.prefetch_related('users', 'users__user').all()
+    queryset = Room.objects.prefetch_related('users', 'users__user', 'messages').all()
     serializer_class = RoomSerializer
     permission_classes = (IsMember, )
 
