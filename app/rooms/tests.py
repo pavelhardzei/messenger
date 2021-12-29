@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework import status
@@ -11,15 +13,15 @@ def test_create_room(api_client, user1, user2):
                                               'room_type': 'closed', 'users': (user2.id,)})
     assert response.status_code == status.HTTP_201_CREATED
 
-    assert response.json() == {'id': 1, 'title': 'room1', 'description': 'some info', 'room_type': 'closed',
+    assert response.json() == {'id': ANY, 'title': 'room1', 'description': 'some info',
+                               'room_type': 'closed', 'messages': [],
                                'users': [
                                    {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
                                              'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
                                              'date_joined': f'{user1.date_joined}'}, 'role': RoomUser.Role.owner},
                                    {'user': {'id': user2.id, 'email': user2.email, 'user_name': user2.user_name,
                                              'full_name': user2.full_name, 'date_of_birth': f'{user2.date_of_birth}',
-                                             'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}
-                               ]}
+                                             'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}]}
 
 
 def test_list_room(api_client, user1, user2, room_open, room_open_user1, room_open_user2):
@@ -29,15 +31,14 @@ def test_list_room(api_client, user1, user2, room_open, room_open_user1, room_op
     assert response.status_code == status.HTTP_200_OK
 
     assert response.json() == [{'id': room_open.id, 'title': room_open.title, 'description': room_open.description,
-                                'room_type': room_open.room_type,
+                                'room_type': room_open.room_type, 'messages': [],
                                 'users': [
                                     {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
                                               'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
                                               'date_joined': f'{user1.date_joined}'}, 'role': RoomUser.Role.owner},
                                     {'user': {'id': user2.id, 'email': user2.email, 'user_name': user2.user_name,
                                               'full_name': user2.full_name, 'date_of_birth': f'{user2.date_of_birth}',
-                                              'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}
-                                ]}]
+                                              'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}]}]
 
 
 def test_room_detail(api_client, user1, room_open, room_open_user1):
@@ -56,7 +57,7 @@ def test_room_enter_leave(api_client, user1, user3, room_open, room_closed, room
     api_client.force_authenticate(user3)
     response = api_client.put(f'/api/room/{room_open.id}/enter/')
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {'id': response.json()['id'], 'room': room_open.id, 'user': user3.id,
+    assert response.json() == {'id': ANY, 'room': room_open.id, 'user': user3.id,
                                'role': RoomUser.Role.member}
 
     response = api_client.delete(f'/api/room/{room_open.id}/leave/')
@@ -151,7 +152,7 @@ def test_get_room_detail_db_calls(api_client, user1, room_open, room_open_user1)
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get(f'/api/room/{room_open.id}/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
 
 
 def test_get_room_list_db_calls(api_client, user1, room_user_factory):
@@ -161,10 +162,10 @@ def test_get_room_list_db_calls(api_client, user1, room_user_factory):
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get('/api/room/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
 
     room_user_factory.create_batch(20, user=user1)
     with CaptureQueriesContext(connection) as query_context:
         response = api_client.get('/api/room/')
     assert response.status_code == status.HTTP_200_OK
-    assert len(query_context) == 3
+    assert len(query_context) == 4
