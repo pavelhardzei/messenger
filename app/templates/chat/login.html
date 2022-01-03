@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <h1>Login</h1>
+    <div>
+        <label for="username">Email or Username</label>
+        <input type="text" id="username" placeholder="Enter email/username"/>
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password"/>
+    </div>
+
+    <button id="login">Login</button>
+</div>
+    <script>
+
+        function LoginUser(body) {
+            return fetch(`http://localhost:8000/api/user/signin/`,
+                {
+                    "method": "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }).then(resp => resp.json())
+        }
+
+        function setToken(resp) {
+            if (resp.token) {
+                localStorage.setItem('Authorization', resp.token)
+                window.location.pathname = 'chat/'
+            }
+        }
+
+        document.getElementById('login').onclick = function(e) {
+            let username = document.getElementById('username').value
+            let password = document.getElementById('password').value
+
+            LoginUser({"user_name": username, "password": password})
+            .then(setToken)
+            .catch(error => console.log(error))
+        };
+    </script>
+</body>
+</html>
