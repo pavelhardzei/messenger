@@ -8,11 +8,11 @@
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send">
-    {{ room_name|json_script:"room-name" }}
+    {{ room_pk|json_script:"room-pk" }}
     <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const roomPK = JSON.parse(document.getElementById('room-pk').textContent);
 
-        const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/?token=${ localStorage.getItem('Authorization')}`);
+        const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomPK}/?token=${ localStorage.getItem('Authorization')}`);
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
