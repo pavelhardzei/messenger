@@ -5,22 +5,47 @@
     <title>Chat Rooms</title>
 </head>
 <body>
-    What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    <h2>Your rooms</h2>
+    <div id="rooms">
+
+    </div>
 
     <script>
-        document.querySelector('#room-name-input').focus();
-        document.querySelector('#room-name-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#room-name-submit').click();
-            }
-        };
+        function fetchRooms() {
+            return fetch(`http://localhost:8000/api/room/`,
+                {
+                    "method": "GET",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('Authorization')}`
+                    }
+                }).then(resp => resp.json())
+        }
 
-        document.querySelector('#room-name-submit').onclick = function(e) {
-            let roomName = document.querySelector('#room-name-input').value;
-            window.location.pathname = '/chat/' + roomName + '/';
-        };
+        let roomsArr = null
+        function showRooms(resp) {
+            roomsArr = resp
+
+            let roomsBlock = document.getElementById('rooms')
+            for (let room of resp) {
+                let btn = document.createElement("button");
+                btn.addEventListener('click', (e) => {
+                    window.location.pathname = `/chat/${room.id}/`;
+                })
+
+                btn.innerHTML = `ID: ${room.id}, Title: ${room.title}`;
+                btn.type = "submit";
+
+                roomsBlock.appendChild(btn);
+                roomsBlock.appendChild(document.createElement("br"))
+            }
+        }
+
+        window.addEventListener('load', (e) => {
+            fetchRooms()
+            .then(showRooms)
+            .catch(error => console.log(error))
+        })
     </script>
 </body>
 </html>
