@@ -1,17 +1,21 @@
 import json
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.room_name = ''
+        self.room_pk = ''
         self.room_group_name = ''
 
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
+        self.room_pk = self.scope['url_route']['kwargs']['pk']
+        if not await self.user_belongs():
+            await self.close()
+
+        self.room_group_name = f'room_pk_{self.room_pk}'
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -30,6 +34,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
+        await self.save_message(message)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -44,3 +50,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'message': message
         }))
+
+    @database_sync_to_async
+    def user_belongs(self):
+        from rooms.models import RoomUser
+        return RoomUser.objects.filter(room=self.room_pk, user=self.scope['user'].pk).exists()
+
+    @database_sync_to_async
+    def save_message(self, message):
+        from room_messages.serializers import MessageSerializer
+
+        serializer = MessageSerializer(data={"text": message, "room": self.room_pk})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(sender=self.scope['user'])
