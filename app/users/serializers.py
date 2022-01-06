@@ -5,7 +5,22 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.authtoken.views import Token
 from rest_framework.exceptions import ValidationError
+from rooms.models import Room, RoomUser
 from users.models import UserProfile
+
+
+class ListRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ('id', 'title', 'description', 'room_type')
+
+
+class ListUserRoomSerializer(serializers.ModelSerializer):
+    room = ListRoomSerializer(read_only=True)
+
+    class Meta:
+        model = RoomUser
+        fields = ('room', 'role')
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
@@ -34,6 +49,17 @@ class UserSerializer(UpdateUserSerializer):
         user.save()
         Token.objects.create(user=user)
         return user
+
+
+class UserRoomsSerializer(UserSerializer):
+    rooms = ListUserRoomSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'email', 'user_name', 'full_name', 'date_of_birth', 'date_joined', 'rooms', 'password')
+
+        extra_kwargs = {'password': {'write_only': True},
+                        'date_joined': {'read_only': True}}
 
 
 class PasswordSerializer(serializers.ModelSerializer):
