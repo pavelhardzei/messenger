@@ -16,7 +16,7 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            document.querySelector('#chat-log').value += (data.sender + ': ' + data.message + '\n');
         };
 
         chatSocket.onclose = function(e) {
@@ -71,7 +71,7 @@
             let chat = document.getElementById('chat-log')
             chat.value = ''
             for (let message of resp.messages)
-                chat.value += `${getUser(resp.users, message.sender).user_name} --- ${message.text}\n`
+                chat.value += `${getUser(resp.users, message.sender).user_name}: ${message.text}\n`
         }
 
         window.addEventListener('load', (e) => {

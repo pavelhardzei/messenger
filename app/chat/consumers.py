@@ -40,15 +40,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': f'{self.scope["user"].user_name} --- {message}'
+                'message': message,
+                'sender': self.scope["user"].user_name
             }
         )
 
     async def chat_message(self, event):
-        message = event['message']
-
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': event['message'],
+            'sender': event['sender']
         }))
 
     @database_sync_to_async
@@ -60,6 +60,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def save_message(self, message):
         from room_messages.serializers import MessageSerializer
 
-        serializer = MessageSerializer(data={"text": message, "room": self.room_pk})
+        serializer = MessageSerializer(data={'text': message, 'room': self.room_pk})
         serializer.is_valid(raise_exception=True)
         serializer.save(sender=self.scope['user'])
