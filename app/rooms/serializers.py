@@ -27,6 +27,14 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'description', 'room_type', 'users', 'messages')
 
 
+class RoomFindingSerializer(serializers.ModelSerializer):
+    users = ListRoomUserSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Room
+        fields = ('id', 'title', 'description', 'room_type', 'users')
+
+
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
