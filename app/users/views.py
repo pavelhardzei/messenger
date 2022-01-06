@@ -26,6 +26,7 @@ class UserSignIn(ObtainAuthToken):
 
 class UserList(generics.ListAPIView):
     serializer_class = UserRoomsSerializer
+    permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
         params = {f'{k}__contains': v for k, v in self.request.query_params.dict().items()}
@@ -33,6 +34,8 @@ class UserList(generics.ListAPIView):
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_queryset(self):
         if self.request.method == 'GET':
             return UserProfile.objects.prefetch_related('rooms', 'rooms__room').all()
