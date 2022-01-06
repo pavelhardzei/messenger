@@ -1,5 +1,4 @@
 import pytest
-from base.conftest import enable_db_access_for_all_tests
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 from chat.factories import AsyncRoomFactory, AsyncRoomUserFactory, AsyncUserFactory

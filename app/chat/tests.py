@@ -12,6 +12,7 @@ def check_messages(n):
     return Message.objects.count() == n
 
 
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('communicator', [0], indirect=True)
 async def test_connection(communicator):
     connected, _ = await communicator.connect()
@@ -26,6 +27,7 @@ async def test_connection(communicator):
     await communicator.disconnect()
 
 
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize('communicator', [1], indirect=True)
 async def test_room_violation(communicator):
     connected, _ = await communicator.connect()
