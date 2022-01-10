@@ -1,3 +1,4 @@
+from base.utils import check
 from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -29,6 +30,8 @@ class UserList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
+        check(self.request.query_params.dict().keys(), UserProfile.query_params())
+
         params = {f'{k}__contains': v for k, v in self.request.query_params.dict().items()}
         return UserProfile.objects.prefetch_related('rooms', 'rooms__room').filter(**params)[:10]
 

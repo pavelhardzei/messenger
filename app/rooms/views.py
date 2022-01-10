@@ -1,4 +1,5 @@
 from base.exceptions import LogicError
+from base.utils import check
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, views
@@ -47,6 +48,8 @@ class RoomFinding(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
+        check(self.request.query_params.dict().keys(), Room.query_params())
+
         params = {f'{k}__contains': v for k, v in self.request.query_params.dict().items()}
         return Room.objects.prefetch_related('users', 'users__user').filter(**params)[:10]
 
