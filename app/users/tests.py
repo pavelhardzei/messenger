@@ -23,6 +23,9 @@ def test_list(api_client, user1):
                                 'full_name': user1.full_name, 'date_of_birth': f'{user1.date_of_birth}',
                                 'rooms': [], 'date_joined': f'{user1.date_joined}'}]
 
+    response = api_client.get('/api/user/?invalid=some')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 def test_detail(api_client, user1, user2):
     api_client.force_authenticate(user1)
