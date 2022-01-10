@@ -22,6 +22,10 @@ class Room(models.Model):
     def __str__(self):
         return self.title
 
+    @staticmethod
+    def query_params():
+        return ('title', 'description', 'room_type')
+
 
 class RoomUser(models.Model):
     class Role(models.TextChoices):
