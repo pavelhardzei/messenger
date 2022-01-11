@@ -42,6 +42,18 @@ def test_list_room(api_client, user1, user2, room_open, room_open_user1, room_op
                                               'date_joined': f'{user2.date_joined}'}, 'role': RoomUser.Role.member}]}]
 
 
+def test_find_room(api_client, user3, room_open):
+    api_client.force_authenticate(user3)
+
+    response = api_client.get(f'/api/room/find/?title={room_open.title}')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == [{'id': ANY, 'title': room_open.title, 'description': room_open.description,
+                               'room_type': room_open.room_type, 'users': []}]
+
+    response = api_client.get('/api/room/find/?invalid=some')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_room_detail(api_client, user1, room_open, room_open_user1):
     api_client.force_authenticate(user1)
     response = api_client.get(f'/api/room/{room_open.id}/')

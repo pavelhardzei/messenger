@@ -62,3 +62,7 @@ class UserProfile(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+
+    @staticmethod
+    def query_params():
+        return ('email', 'user_name', 'full_name')

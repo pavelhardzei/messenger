@@ -1,10 +1,12 @@
+from base.utils import check
 from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
-from users.serializers import PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserSerializer
+from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserRoomsSerializer,
+                               UserSerializer)
 
 
 class UserSignUp(generics.CreateAPIView):
@@ -20,16 +22,27 @@ class UserSignIn(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
 
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email,
-            'user_name': user.user_name
-        })
+        return Response({'token': token.key, 'user_id': user.pk, 'email': user.email, 'user_name': user.user_name})
+
+
+class UserList(generics.ListAPIView):
+    serializer_class = UserRoomsSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def get_queryset(self):
+        check(self.request.query_params.dict().keys(), UserProfile.query_params())
+
+        params = {f'{k}__contains': v for k, v in self.request.query_params.dict().items()}
+        return UserProfile.objects.prefetch_related('rooms', 'rooms__room').filter(**params)[:10]
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = UserProfile.objects.all()
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        if self.request.method == 'GET':
+            return UserProfile.objects.prefetch_related('rooms', 'rooms__room').all()
+        return UserProfile.objects.all()
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -38,7 +51,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return UserSerializer
+            return UserRoomsSerializer
         return UpdateUserSerializer
 
     def get_object(self):

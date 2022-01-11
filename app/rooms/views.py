@@ -1,11 +1,12 @@
 from base.exceptions import LogicError
+from base.utils import check
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
-from rooms.serializers import InvitationSerializer, RoomSerializer, RoomUserSerializer
+from rooms.serializers import InvitationSerializer, RoomFindingSerializer, RoomSerializer, RoomUserSerializer
 
 
 class RoomList(generics.ListCreateAPIView):
@@ -40,6 +41,17 @@ class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Room.objects.prefetch_related('users', 'users__user', 'messages').all()
     serializer_class = RoomSerializer
     permission_classes = (IsMember, )
+
+
+class RoomFinding(generics.ListAPIView):
+    serializer_class = RoomFindingSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def get_queryset(self):
+        check(self.request.query_params.dict().keys(), Room.query_params())
+
+        params = {f'{k}__contains': v for k, v in self.request.query_params.dict().items()}
+        return Room.objects.prefetch_related('users', 'users__user').filter(**params)[:10]
 
 
 class EnterRoom(views.APIView):
