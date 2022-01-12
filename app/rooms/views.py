@@ -2,7 +2,7 @@ from base.exceptions import LogicError
 from base.utils import check
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions, status, views
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
