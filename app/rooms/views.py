@@ -54,20 +54,21 @@ class RoomFinding(generics.ListAPIView):
         return Room.objects.prefetch_related('users', 'users__user').filter(**params)[:10]
 
 
-class EnterRoom(views.APIView):
+class EnterRoom(generics.GenericAPIView):
+    serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
     def put(self, request, *args, **kwargs):
         room_user = RoomUser.objects.filter(room=self.kwargs['pk'], user=request.user.id).first()
         if room_user:
-            return Response(RoomUserSerializer(room_user).data)
+            return Response(self.get_serializer(room_user).data)
 
         room = get_object_or_404(Room, pk=self.kwargs['pk'])
         if not room.is_open:
             raise LogicError('Room is not open', status.HTTP_403_FORBIDDEN)
 
-        serializer = RoomUserSerializer(data={'room': self.kwargs['pk'], 'user': request.user.id,
-                                              'role': RoomUser.Role.member})
+        serializer = self.get_serializer(data={'room': self.kwargs['pk'], 'user': request.user.id,
+                                               'role': RoomUser.Role.member})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -104,14 +105,15 @@ class RemoveUser(generics.DestroyAPIView):
         return obj
 
 
-class SetRole(views.APIView):
+class SetRole(generics.GenericAPIView):
+    serializer_class = RoomUserSerializer
     permission_classes = (IsOwner, )
 
     def put(self, request, *args, **kwargs):
         instance = get_object_or_404(RoomUser, room=self.kwargs['room_pk'], user=self.kwargs['user_pk'])
         self.check_object_permissions(request, instance)
 
-        serializer = RoomUserSerializer(instance, data={'role': request.data['role']}, partial=True)
+        serializer = self.get_serializer(instance, data={'role': request.data['role']}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
