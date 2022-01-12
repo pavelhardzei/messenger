@@ -5,6 +5,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
+from users.schemas import UserDetailSchema
 from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserRoomsSerializer,
                                UserSerializer)
 
@@ -37,7 +38,8 @@ class UserList(generics.ListAPIView):
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    schema = UserDetailSchema()
+    permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
         if self.request.method == 'GET':
