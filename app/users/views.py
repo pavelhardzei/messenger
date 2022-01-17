@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from rest_framework.schemas.openapi import AutoSchema
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
 from users.schemas import UserDetailSchema
@@ -11,10 +12,12 @@ from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSe
 
 
 class UserSignUp(generics.CreateAPIView):
+    schema = AutoSchema(tags=['users'])
     serializer_class = UserSerializer
 
 
 class UserSignIn(ObtainAuthToken):
+    schema = AutoSchema(tags=['users'])
     serializer_class = TokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -27,6 +30,7 @@ class UserSignIn(ObtainAuthToken):
 
 
 class UserList(generics.ListAPIView):
+    schema = AutoSchema(tags=['users'])
     serializer_class = UserRoomsSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -38,7 +42,7 @@ class UserList(generics.ListAPIView):
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    schema = UserDetailSchema()
+    schema = UserDetailSchema(tags=['users'])
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
@@ -63,6 +67,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ChangePassword(generics.UpdateAPIView):
+    schema = AutoSchema(tags=['users'])
     queryset = UserProfile.objects.all()
     serializer_class = PasswordSerializer
     permission_classes = (IsAdminOrOwner, )

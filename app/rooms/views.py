@@ -4,12 +4,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.schemas.openapi import AutoSchema
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
 from rooms.serializers import InvitationSerializer, RoomFindingSerializer, RoomSerializer, RoomUserSerializer
 
 
 class RoomList(generics.ListCreateAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -38,12 +40,14 @@ class RoomList(generics.ListCreateAPIView):
 
 
 class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
+    schema = AutoSchema(tags=['rooms'])
     queryset = Room.objects.prefetch_related('users', 'users__user', 'messages').all()
     serializer_class = RoomSerializer
     permission_classes = (IsMember, )
 
 
 class RoomFinding(generics.ListAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomFindingSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -55,6 +59,7 @@ class RoomFinding(generics.ListAPIView):
 
 
 class EnterRoom(generics.GenericAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -76,6 +81,7 @@ class EnterRoom(generics.GenericAPIView):
 
 
 class LeaveRoom(generics.DestroyAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -95,6 +101,7 @@ class LeaveRoom(generics.DestroyAPIView):
 
 
 class RemoveUser(generics.DestroyAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (IsHigherRole, )
 
@@ -106,6 +113,7 @@ class RemoveUser(generics.DestroyAPIView):
 
 
 class SetRole(generics.GenericAPIView):
+    schema = AutoSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (IsOwner, )
 
@@ -121,6 +129,7 @@ class SetRole(generics.GenericAPIView):
 
 
 class MakeInvitation(generics.CreateAPIView):
+    schema = AutoSchema(tags=['invitations'])
     serializer_class = InvitationSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -134,6 +143,7 @@ class MakeInvitation(generics.CreateAPIView):
 
 
 class AcceptInvitation(generics.CreateAPIView):
+    schema = AutoSchema(tags=['invitations'])
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
