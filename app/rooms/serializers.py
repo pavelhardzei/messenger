@@ -41,3 +41,13 @@ class InvitationSerializer(serializers.ModelSerializer):
         fields = ('id', 'room', 'created', 'expiration')
 
         extra_kwargs = {'created': {'read_only': True}}
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
+
+
+class SetRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomUser
+        fields = ('role', )

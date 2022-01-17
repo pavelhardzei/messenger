@@ -8,7 +8,7 @@ from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
 from users.schemas import UserDetailSchema, UserSignInSchema
 from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserRoomsSerializer,
-                               UserSerializer, UserSignInSerializer)
+                               UserSerializer)
 
 
 class UserSignUp(generics.CreateAPIView):
@@ -26,10 +26,7 @@ class UserSignIn(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
 
-        response = UserSignInSerializer(data={'token': token.key, 'user_id': user.pk, 'email':
-                                              user.email, 'user_name': user.user_name})
-
-        return Response(response.initial_data)
+        return Response({'token': token.key, 'user_id': user.pk, 'email': user.email, 'user_name': user.user_name})
 
 
 class UserList(generics.ListAPIView):

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
+from rooms.schemas import EmptyRequestSchema, SetRoleSchema
 from rooms.serializers import InvitationSerializer, RoomFindingSerializer, RoomSerializer, RoomUserSerializer
 
 
@@ -31,7 +32,7 @@ class RoomList(generics.ListCreateAPIView):
 
         room = get_object_or_404(self.get_queryset(), pk=room_id)
 
-        return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+        return Response(self.get_serializer(room).data, status=status.HTTP_201_CREATED)
 
     def create_room_user(self, room_id, user_id, role):
         room_user = RoomUserSerializer(data={'room': room_id, 'user': user_id, 'role': role})
@@ -59,7 +60,7 @@ class RoomFinding(generics.ListAPIView):
 
 
 class EnterRoom(generics.GenericAPIView):
-    schema = AutoSchema(tags=['rooms'])
+    schema = EmptyRequestSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -113,7 +114,7 @@ class RemoveUser(generics.DestroyAPIView):
 
 
 class SetRole(generics.GenericAPIView):
-    schema = AutoSchema(tags=['rooms'])
+    schema = SetRoleSchema(tags=['rooms'])
     serializer_class = RoomUserSerializer
     permission_classes = (IsOwner, )
 
@@ -143,7 +144,7 @@ class MakeInvitation(generics.CreateAPIView):
 
 
 class AcceptInvitation(generics.CreateAPIView):
-    schema = AutoSchema(tags=['invitations'])
+    schema = EmptyRequestSchema(tags=['invitations'])
     serializer_class = RoomUserSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
