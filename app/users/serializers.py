@@ -115,3 +115,10 @@ class TokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class UserSignInSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    email = serializers.EmailField()
+    user_name = serializers.CharField()
+    token = serializers.CharField()
