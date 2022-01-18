@@ -7,12 +7,12 @@ from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rooms.models import Invitation, Room, RoomUser
 from rooms.permissions import IsHigherRole, IsMember, IsOwner
-from rooms.schemas import EmptyRequestSchema, SetRoleSchema
+from rooms.schemas import EmptyRequestSchema, SetRoleSchema, RoomListSchema
 from rooms.serializers import InvitationSerializer, RoomFindingSerializer, RoomSerializer, RoomUserSerializer
 
 
 class RoomList(generics.ListCreateAPIView):
-    schema = AutoSchema(tags=['rooms'])
+    schema = RoomListSchema(tags=['rooms'])
     serializer_class = RoomSerializer
     permission_classes = (permissions.IsAuthenticated, )
 

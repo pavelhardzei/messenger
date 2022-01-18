@@ -51,3 +51,11 @@ class SetRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomUser
         fields = ('role', )
+
+
+class RoomCreateSerializer(serializers.ModelSerializer):
+    users = serializers.ListField(child=serializers.IntegerField())
+
+    class Meta:
+        model = Room
+        fields = ('id', 'title', 'description', 'room_type', 'users')
