@@ -26,10 +26,7 @@ class UserSignIn(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
 
-        serializer = UserTokenSerializer(data={'user': user, 'token': token.key})
-        serializer.is_valid(raise_exception=True)
-
-        return Response(serializer.data)
+        return Response(UserTokenSerializer({'user': user, 'token': token.key}).data)
 
 
 class UserList(generics.ListAPIView):
