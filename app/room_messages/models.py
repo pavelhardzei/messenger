@@ -11,3 +11,6 @@ class Message(models.Model):
     sender = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=datetime.datetime.utcnow)
     updated_at = models.DateTimeField(default=datetime.datetime.utcnow)
+
+    class Meta:
+        ordering = ['-id']

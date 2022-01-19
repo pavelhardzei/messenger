@@ -117,8 +117,6 @@ class TokenSerializer(serializers.Serializer):
         return attrs
 
 
-class UserSignInSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    email = serializers.EmailField()
-    user_name = serializers.CharField()
+class UserTokenSerializer(serializers.Serializer):
+    user = UserRoomsSerializer(read_only=True)
     token = serializers.CharField()

@@ -1,5 +1,5 @@
 from rest_framework.schemas.openapi import AutoSchema
-from users.serializers import UpdateUserSerializer, UserRoomsSerializer, UserSignInSerializer
+from users.serializers import UpdateUserSerializer, UserRoomsSerializer, UserTokenSerializer
 
 
 class UserDetailSchema(AutoSchema):
@@ -11,4 +11,4 @@ class UserDetailSchema(AutoSchema):
 
 class UserSignInSchema(AutoSchema):
     def get_response_serializer(self, path, method):
-        return UserSignInSerializer()
+        return UserTokenSerializer()
