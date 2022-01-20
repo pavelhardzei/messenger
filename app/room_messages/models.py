@@ -13,4 +13,4 @@ class Message(models.Model):
     updated_at = models.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['id']
