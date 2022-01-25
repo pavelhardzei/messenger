@@ -1,5 +1,6 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.schemas.openapi import AutoSchema
 from room_messages.models import Message
 from room_messages.permissions import IsSender
 from room_messages.serializers import MessageSerializer
@@ -7,6 +8,7 @@ from rooms.models import RoomUser
 
 
 class MessageCreate(generics.CreateAPIView):
+    schema = AutoSchema(tags=['messages'])
     serializer_class = MessageSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -21,6 +23,7 @@ class MessageCreate(generics.CreateAPIView):
 
 
 class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
+    schema = AutoSchema(tags=['messages'])
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = (IsSender, )

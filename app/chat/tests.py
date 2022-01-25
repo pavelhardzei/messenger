@@ -20,7 +20,8 @@ async def test_connection(communicator):
 
     await communicator.send_json_to({'message': 'hello'})
     response = await communicator.receive_json_from()
-    assert response == {'message': 'hello', 'sender': ANY}
+    assert response == {'id': ANY, 'text': 'hello', 'room': ANY,
+                        'sender': ANY, 'created_at': ANY, 'updated_at': ANY}
 
     assert await check_messages(1)
 

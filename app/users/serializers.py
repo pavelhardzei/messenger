@@ -115,3 +115,8 @@ class TokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class UserTokenSerializer(serializers.Serializer):
+    user = UserRoomsSerializer(read_only=True)
+    token = serializers.CharField()

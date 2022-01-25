@@ -32,4 +32,4 @@ class MessageSerializer(serializers.ModelSerializer):
 class ListMessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ('text', 'sender', 'created_at', 'updated_at')
+        fields = ('id', 'text', 'sender', 'created_at', 'updated_at')

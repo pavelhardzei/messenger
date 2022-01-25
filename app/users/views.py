@@ -3,18 +3,21 @@ from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from rest_framework.schemas.openapi import AutoSchema
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
-from users.schemas import UserDetailSchema
+from users.schemas import UserDetailSchema, UserSignInSchema
 from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserRoomsSerializer,
-                               UserSerializer)
+                               UserSerializer, UserTokenSerializer)
 
 
 class UserSignUp(generics.CreateAPIView):
+    schema = AutoSchema(tags=['users'])
     serializer_class = UserSerializer
 
 
 class UserSignIn(ObtainAuthToken):
+    schema = UserSignInSchema(tags=['users'])
     serializer_class = TokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -23,10 +26,11 @@ class UserSignIn(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
 
-        return Response({'token': token.key, 'user_id': user.pk, 'email': user.email, 'user_name': user.user_name})
+        return Response(UserTokenSerializer({'user': user, 'token': token.key}).data)
 
 
 class UserList(generics.ListAPIView):
+    schema = AutoSchema(tags=['users'])
     serializer_class = UserRoomsSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
@@ -38,7 +42,7 @@ class UserList(generics.ListAPIView):
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    schema = UserDetailSchema()
+    schema = UserDetailSchema(tags=['users'])
     permission_classes = (permissions.IsAuthenticated, )
 
     def get_queryset(self):
@@ -63,6 +67,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ChangePassword(generics.UpdateAPIView):
+    schema = AutoSchema(tags=['users'])
     queryset = UserProfile.objects.all()
     serializer_class = PasswordSerializer
     permission_classes = (IsAdminOrOwner, )

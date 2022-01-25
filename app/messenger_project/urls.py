@@ -22,8 +22,6 @@ from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
     path('api/', include('messenger_project.api_urls')),
-    path('chat/', include('chat.urls')),
-    path('login/', TemplateView.as_view(template_name='chat/login.html')),
     path('openapi/', get_schema_view(title='Messenger', public=True), name='openapi_schema'),
     path('swagger/', TemplateView.as_view(template_name='openapi/swagger.html',
                                           extra_context={'schema_url': 'openapi_schema'}), name='swagger'),
