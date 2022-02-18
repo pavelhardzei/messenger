@@ -1,3 +1,6 @@
+from unittest.mock import ANY
+
+import pyotp
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework import status
@@ -13,6 +16,42 @@ def test_signup(api_client):
 def test_signin(api_client, user1):
     response = api_client.post('/api/user/signin/', {'email': user1.email, 'password': 'testing321'})
     assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'user': {'id': user1.id, 'email': user1.email, 'user_name': user1.user_name,
+                                        'date_joined': f'{user1.date_joined}',
+                                        'date_of_birth': f'{user1.date_of_birth}',
+                                        'full_name': user1.full_name, 'rooms': []},
+                               'token': ANY}
+
+
+def test_signin_invalid(api_client, user1):
+    response = api_client.post('/api/user/signin/', {'email': user1.email, 'password': 'invalid'})
+    assert response.status_code == 400
+    assert response.json() == {'error_message': ['Unable to log in with provided credentials']}
+
+
+def test_turn_totp(api_client, user1):
+    api_client.force_authenticate(user1)
+    response = api_client.post('/api/user/totp/')
+    assert response.status_code == 200
+    assert response.json() == {'secret': pyotp.TOTP(user1.secret).provisioning_uri()}
+
+    response = api_client.post('/api/user/totp/')
+    assert response.status_code == 200
+    assert response.json() == {'secret': pyotp.TOTP(None).provisioning_uri()}
+
+
+def test_signin_with_totp(api_client, user2):
+    api_client.force_authenticate(user2)
+    response = api_client.post('/api/user/signin/', {'email': user2.email, 'password': 'testing321',
+                                                     'totp': pyotp.TOTP('base32secret').now()})
+    assert response.status_code == 200
+
+
+def test_signin_with_totp_invalid(api_client, user2):
+    api_client.force_authenticate(user2)
+    response = api_client.post('/api/user/signin/', {'email': user2.email, 'password': 'testing321', 'totp': 'invalid'})
+    assert response.status_code == 400
+    assert response.json() == {'error_message': ['Invalid one-time password']}
 
 
 def test_list(api_client, user1):

@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.auth import authenticate
+import pyotp
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.authtoken.views import Token
@@ -48,6 +48,7 @@ class UserSerializer(UpdateUserSerializer):
         user.set_password(validated_data['password'])
         user.save()
         Token.objects.create(user=user)
+
         return user
 
 
@@ -92,11 +93,13 @@ class TokenSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     user_name = serializers.CharField(required=False)
     password = serializers.CharField()
+    totp = serializers.CharField(required=False)
 
     def validate(self, attrs):
         email = attrs.get('email')
         user_name = attrs.get('user_name')
         password = attrs.get('password')
+        totp = attrs.get('totp')
 
         if not (email or user_name) or not password:
             raise ValidationError({'error_message': 'Must include email + pwd or user_name + pwd'})
@@ -106,12 +109,11 @@ class TokenSerializer(serializers.Serializer):
         else:
             user = get_object_or_404(UserProfile, user_name=user_name)
 
-        user = authenticate(email=user.email, password=password)
-        if user:
-            if not user.is_active:
-                raise ValidationError({'error_message': 'User account is disabled'})
-        else:
+        if not (user.check_password(password) and user.is_active):
             raise ValidationError({'error_message': 'Unable to log in with provided credentials'})
+
+        if user.secret and not pyotp.TOTP(user.secret).verify(totp):
+            raise ValidationError({'error_message': 'Invalid one-time password'})
 
         attrs['user'] = user
         return attrs
@@ -120,3 +122,7 @@ class TokenSerializer(serializers.Serializer):
 class UserTokenSerializer(serializers.Serializer):
     user = UserRoomsSerializer(read_only=True)
     token = serializers.CharField()
+
+
+class TOTPSerializer(serializers.Serializer):
+    secret = serializers.URLField()
