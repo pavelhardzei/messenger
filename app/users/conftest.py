@@ -4,6 +4,7 @@ from rooms.factories import RoomUserFactory
 from users.factories import UserFactory
 
 register(UserFactory, 'user1')
-register(UserFactory, 'user2')
+register(UserFactory, 'user2', secret='base32secret')
+
 
 register(RoomUserFactory)

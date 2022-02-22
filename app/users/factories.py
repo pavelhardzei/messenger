@@ -14,4 +14,5 @@ class UserFactory(factory.django.DjangoModelFactory):
     user_name = factory.Sequence(lambda _: fake.user_name())
     full_name = fake.name()
     date_of_birth = fake.date_of_birth()
+    secret = None
     password = make_password('testing321')

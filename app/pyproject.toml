@@ -6,7 +6,6 @@ authors = ["pavelhardzei <pavelgordei11@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pre-commit = "^2.16.0"
 Django = "^3.2.9"
 psycopg2-binary = "^2.9.2"
 gunicorn = "^20.1.0"
@@ -16,8 +15,10 @@ channels-redis = "^3.3.1"
 uritemplate = "^4.1.1"
 PyYAML = "^6.0"
 django-cors-headers = "^3.11.0"
+pyotp = "^2.6.0"
 
 [tool.poetry.dev-dependencies]
+pre-commit = "^2.16.0"
 pytest-django = "^4.5.2"
 pytest-factoryboy = "^2.1.0"
 pytest-asyncio = "^0.16.0"

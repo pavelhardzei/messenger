@@ -1,14 +1,15 @@
+import pyotp
 from base.utils import check
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
-from users.schemas import UserDetailSchema, UserSignInSchema
-from users.serializers import (PasswordSerializer, TokenSerializer, UpdateUserSerializer, UserRoomsSerializer,
-                               UserSerializer, UserTokenSerializer)
+from users.schemas import TOTPSchema, UserDetailSchema, UserSignInSchema
+from users.serializers import (PasswordSerializer, TokenSerializer, TOTPSerializer, UpdateUserSerializer,
+                               UserRoomsSerializer, UserSerializer, UserTokenSerializer)
 
 
 class UserSignUp(generics.CreateAPIView):
@@ -24,7 +25,7 @@ class UserSignIn(ObtainAuthToken):
         serializer = TokenSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
+        token, _ = Token.objects.get_or_create(user=user)
 
         return Response(UserTokenSerializer({'user': user, 'token': token.key}).data)
 
@@ -66,7 +67,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         return super().get_object()
 
 
-class ChangePassword(generics.UpdateAPIView):
+class ChangePassword(generics.GenericAPIView):
     schema = AutoSchema(tags=['users'])
     queryset = UserProfile.objects.all()
     serializer_class = PasswordSerializer
@@ -77,5 +78,24 @@ class ChangePassword(generics.UpdateAPIView):
             self.kwargs['pk'] = self.request.user.pk
         return super().get_object()
 
-    def patch(self, request, *args, **kwargs):
-        return Response({'detail': 'Method "PATCH" not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+class TurnTOTP(generics.CreateAPIView):
+    schema = TOTPSchema(tags=['users'])
+    serializer_class = TOTPSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        user.secret = pyotp.random_base32() if not user.secret else None
+        user.save()
+
+        totp = pyotp.TOTP(user.secret).provisioning_uri()
+        return Response(self.get_serializer({'secret': totp}).data)
