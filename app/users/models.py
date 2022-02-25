@@ -41,7 +41,7 @@ class UserProfile(AbstractBaseUser):
     email = models.EmailField(unique=True)
     user_name = models.CharField(max_length=30, unique=True)
     full_name = models.CharField(max_length=50)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True, default=None)
     date_joined = models.DateField(default=datetime.date.today)
     secret = models.CharField(max_length=50, null=True, default=None)
     is_active = models.BooleanField(default=True)

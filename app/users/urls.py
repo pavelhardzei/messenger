@@ -7,5 +7,6 @@ urlpatterns = [
     path('signin/', views.UserSignIn.as_view(), name='signin'),
     path('totp/', views.TurnTOTP.as_view(), name='totp'),
     re_path(r'^(?P<pk>(\d+|me))/$', views.UserDetail.as_view(), name='user_detail'),
-    re_path(r'^change_pwd/(?P<pk>(\d+|me))/$', views.ChangePassword.as_view(), name='user_change_pwd')
+    re_path(r'^change_pwd/(?P<pk>(\d+|me))/$', views.ChangePassword.as_view(), name='user_change_pwd'),
+    path('google/callback/', views.GoogleCallback.as_view())
 ]
