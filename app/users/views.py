@@ -1,6 +1,10 @@
+import os
+
 import pyotp
 from base.utils import check
+from django.shortcuts import HttpResponseRedirect
 from rest_framework import generics, permissions
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -10,6 +14,19 @@ from users.permissions import IsAdminOrOwner
 from users.schemas import TOTPSchema, UserDetailSchema, UserSignInSchema
 from users.serializers import (PasswordSerializer, TokenSerializer, TOTPSerializer, UpdateUserSerializer,
                                UserRoomsSerializer, UserSerializer, UserTokenSerializer)
+
+
+class GoogleCallback(generics.GenericAPIView):
+    authentication_classes = (SessionAuthentication, )
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            return Response({'message': 'Authorize via google'})
+
+        token, _ = Token.objects.get_or_create(user=request.user)
+        request.session.clear()
+
+        return HttpResponseRedirect(f"{os.getenv('FRONTEND_REDIRECT')}?token={token.key}")
 
 
 class UserSignUp(generics.CreateAPIView):
