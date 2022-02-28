@@ -1,5 +1,8 @@
+import os
+
 import pyotp
 from base.utils import check
+from django.shortcuts import HttpResponseRedirect
 from rest_framework import generics, permissions
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
@@ -23,7 +26,7 @@ class GoogleCallback(generics.GenericAPIView):
         token, _ = Token.objects.get_or_create(user=request.user)
         request.session.clear()
 
-        return Response(UserTokenSerializer({'user': request.user, 'token': token.key}).data)
+        return HttpResponseRedirect(f"{os.getenv('FRONTEND_REDIRECT')}?token={token.key}")
 
 
 class UserSignUp(generics.CreateAPIView):
