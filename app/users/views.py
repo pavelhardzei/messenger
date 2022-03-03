@@ -2,21 +2,27 @@ import os
 
 import pyotp
 from base.utils import check
-from django.shortcuts import HttpResponseRedirect
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.shortcuts import HttpResponseRedirect, get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
+from rooms.serializers import EmptySerializer
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
 from users.schemas import TOTPSchema, UserDetailSchema, UserSignInSchema
-from users.serializers import (PasswordSerializer, TokenSerializer, TOTPSerializer, UpdateUserSerializer,
-                               UserRoomsSerializer, UserSerializer, UserTokenSerializer)
+from users.serializers import (PasswordSerializer, ResendVerificationSerializer, TokenSerializer, TOTPSerializer,
+                               UpdateUserSerializer, UserRoomsSerializer, UserSerializer, UserTokenSerializer)
 
 
 class GoogleCallback(generics.GenericAPIView):
+    schema = AutoSchema(tags=['users'])
+    serializer_class = EmptySerializer
     authentication_classes = (SessionAuthentication, )
 
     def get(self, request, *args, **kwargs):
@@ -32,6 +38,49 @@ class GoogleCallback(generics.GenericAPIView):
 class UserSignUp(generics.CreateAPIView):
     schema = AutoSchema(tags=['users'])
     serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        user = get_object_or_404(UserProfile, id=response.data['id'])
+        link = f"{os.getenv('VERIFICATION_LINK')}?user={user.id}&token={default_token_generator.make_token(user)}"
+
+        send_mail('Email verification', f'Follow this link to verify your email: {link}',
+                  from_email=settings.EMAIL_HOST_USER, recipient_list=[response.data['email']])
+
+        return response
+
+
+class EmailVerification(generics.GenericAPIView):
+    schema = AutoSchema(tags=['users'])
+    serializer_class = EmptySerializer
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(UserProfile, id=request.query_params['user'])
+
+        token = request.query_params['token']
+        if not default_token_generator.check_token(user, token):
+            return HttpResponseRedirect(f"{os.getenv('FRONTEND_VERIFICATION_FAILED_REDIRECT')}?status=failed")
+
+        user.is_active = True
+        user.save()
+        return HttpResponseRedirect(f"{os.getenv('FRONTEND_VERIFICATION_SUCCESS_REDIRECT')}?status=verified")
+
+
+class ResendVerification(generics.GenericAPIView):
+    schema = AutoSchema(tags=['users'])
+    serializer_class = ResendVerificationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = get_object_or_404(UserProfile, email=serializer.data['email'])
+        link = f"{os.getenv('VERIFICATION_LINK')}?user={user.id}&token={default_token_generator.make_token(user)}"
+
+        send_mail('Email verification (repeated)', f'Follow this link to verify your email: {link}',
+                  from_email=settings.EMAIL_HOST_USER, recipient_list=[user.email])
+
+        return Response(serializer.data)
 
 
 class UserSignIn(ObtainAuthToken):
