@@ -44,7 +44,7 @@ class UserProfile(AbstractBaseUser):
     date_of_birth = models.DateField(null=True, default=None)
     date_joined = models.DateField(default=datetime.date.today)
     secret = models.CharField(max_length=50, null=True, default=None)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
