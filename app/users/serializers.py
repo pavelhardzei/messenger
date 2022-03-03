@@ -57,10 +57,9 @@ class UserRoomsSerializer(UserSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('id', 'email', 'user_name', 'full_name', 'date_of_birth', 'date_joined', 'rooms', 'password')
+        fields = ('id', 'email', 'user_name', 'full_name', 'date_of_birth', 'date_joined', 'rooms')
 
-        extra_kwargs = {'password': {'write_only': True},
-                        'date_joined': {'read_only': True}}
+        extra_kwargs = {'date_joined': {'read_only': True}}
 
 
 class PasswordSerializer(serializers.ModelSerializer):
@@ -126,3 +125,7 @@ class UserTokenSerializer(serializers.Serializer):
 
 class TOTPSerializer(serializers.Serializer):
     secret = serializers.URLField()
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
