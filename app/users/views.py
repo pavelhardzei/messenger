@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -59,11 +59,12 @@ class EmailVerification(generics.GenericAPIView):
 
         token = request.query_params['token']
         if not default_token_generator.check_token(user, token):
-            return HttpResponseRedirect(f"{os.getenv('FRONTEND_VERIFICATION_FAILED_REDIRECT')}?status=failed")
+            return Response({'message': 'Link is invalid or expired. Please, request another confirmation email'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user.is_active = True
         user.save()
-        return HttpResponseRedirect(f"{os.getenv('FRONTEND_VERIFICATION_SUCCESS_REDIRECT')}?status=verified")
+        return Response({'message': 'Email successfully verified'})
 
 
 class ResendVerification(generics.GenericAPIView):
