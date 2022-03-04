@@ -4,7 +4,8 @@ from users.models import UserProfile
 
 
 class ProfileAdmin(BaseUserAdmin):
-    list_display = ('email', 'user_name', 'full_name', 'date_of_birth', 'date_joined', 'is_staff', 'is_superuser')
+    list_display = ('email', 'user_name', 'full_name', 'date_of_birth', 'date_joined',
+                    'is_staff', 'is_superuser', 'is_active')
     list_filter = ('is_superuser', )
 
     fieldsets = (

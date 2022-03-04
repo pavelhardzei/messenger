@@ -18,5 +18,6 @@ class SocialAdapter(DefaultSocialAccountAdapter):
         user.email = data.get('email')
         user.user_name = data.get('email').lower()
         user.full_name = f"{data.get('first_name')} {data.get('last_name')}"
+        user.is_active = True
 
         return user
