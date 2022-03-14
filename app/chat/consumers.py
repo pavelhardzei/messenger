@@ -68,3 +68,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
         serializer.save(sender=self.scope['user'])
 
         return serializer.data
+
+
+class UserConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_group_name = ''
+
+    async def connect(self):
+        self.user_group_name = f"user_pk_{self.scope['user'].pk}"
+
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.user_group_name,
+            self.channel_name
+        )
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'id': event['id'],
+            'text': event['text'],
+            'room': event['room'],
+            'sender': event['sender'],
+            'created_at': event['created_at'],
+            'updated_at': event['updated_at']
+        }))

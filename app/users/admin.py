@@ -9,11 +9,11 @@ class ProfileAdmin(BaseUserAdmin):
     list_filter = ('is_superuser', )
 
     fieldsets = (
-        (None, {'fields': ('email', 'is_staff', 'is_superuser', 'password')}),
+        (None, {'fields': ('email', 'is_staff', 'is_superuser', 'is_active', 'password')}),
         ('Personal info', {'fields': ('user_name', 'full_name', 'date_of_birth', 'date_joined')})
     )
     add_fieldsets = (
-        (None, {'fields': ('email', 'is_staff', 'is_superuser', 'password1', 'password2')}),
+        (None, {'fields': ('email', 'is_staff', 'is_superuser', 'is_active', 'password1', 'password2')}),
         ('Personal info', {'fields': ('user_name', 'full_name', 'date_of_birth')})
     )
 
