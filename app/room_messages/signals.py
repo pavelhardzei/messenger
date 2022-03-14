@@ -13,13 +13,11 @@ def send_notification(sender, instance, created, **kwargs):
         return None
 
     msg = MessageSerializer(instance).data
-    room = instance.room
-    prefetch_related_objects([room], 'users__user')
+    prefetch_related_objects([instance], 'room', 'room__users__user')
 
     channel_layer = get_channel_layer()
-    for room_user in room.users.all():
-        if instance.sender != room_user.user:
-            async_to_sync(channel_layer.group_send)(
-                f'user_pk_{room_user.user.pk}',
-                {'type': 'send_notification', **msg}
-            )
+    for room_user in instance.room.users.all().exclude(user=instance.sender):
+        async_to_sync(channel_layer.group_send)(
+            f'user_pk_{room_user.user.pk}',
+            {'type': 'send_notification', **msg}
+        )
