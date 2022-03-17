@@ -129,3 +129,11 @@ class TOTPSerializer(serializers.Serializer):
 
 class ResendVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class UserListSerializer(serializers.Serializer):
+    users = serializers.ListField(child=serializers.IntegerField())
+
+
+class UsersOnlineDictSerializer(serializers.Serializer):
+    users = serializers.DictField(child=serializers.BooleanField())
