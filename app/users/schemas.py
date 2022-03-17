@@ -1,6 +1,7 @@
 from rest_framework.schemas.openapi import AutoSchema
 from rooms.serializers import EmptySerializer
-from users.serializers import TOTPSerializer, UpdateUserSerializer, UserRoomsSerializer, UserTokenSerializer
+from users.serializers import (TOTPSerializer, UpdateUserSerializer, UserListSerializer, UserRoomsSerializer,
+                               UsersOnlineDictSerializer, UserTokenSerializer)
 
 
 class UserDetailSchema(AutoSchema):
@@ -21,3 +22,11 @@ class TOTPSchema(AutoSchema):
 
     def get_response_serializer(self, path, method):
         return TOTPSerializer()
+
+
+class UsersOnlineSchema(AutoSchema):
+    def get_request_serializer(self, path, method):
+        return UserListSerializer()
+
+    def get_response_serializer(self, path, method):
+        return UsersOnlineDictSerializer()
