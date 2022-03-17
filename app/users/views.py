@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
+from django_redis import get_redis_connection
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
@@ -15,9 +16,10 @@ from rest_framework.schemas.openapi import AutoSchema
 from rooms.serializers import EmptySerializer
 from users.models import UserProfile
 from users.permissions import IsAdminOrOwner
-from users.schemas import TOTPSchema, UserDetailSchema, UserSignInSchema
+from users.schemas import TOTPSchema, UserDetailSchema, UserSignInSchema, UsersOnlineSchema
 from users.serializers import (PasswordSerializer, ResendVerificationSerializer, TokenSerializer, TOTPSerializer,
-                               UpdateUserSerializer, UserRoomsSerializer, UserSerializer, UserTokenSerializer)
+                               UpdateUserSerializer, UserListSerializer, UserRoomsSerializer, UserSerializer,
+                               UsersOnlineDictSerializer, UserTokenSerializer)
 
 
 class GoogleCallback(generics.GenericAPIView):
@@ -166,3 +168,20 @@ class TurnTOTP(generics.CreateAPIView):
 
         totp = pyotp.TOTP(user.secret).provisioning_uri()
         return Response(self.get_serializer({'secret': totp}).data)
+
+
+class UsersOnline(generics.GenericAPIView):
+    schema = UsersOnlineSchema(tags=['users'])
+    serializer_class = UserListSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        conn = get_redis_connection('default')
+        users_online = {}
+        for user in serializer.data['users']:
+            users_online[user] = conn.sismember(os.getenv('CACHE_USERS_ONLINE'), user)
+
+        return Response(UsersOnlineDictSerializer({'users': users_online}).data)

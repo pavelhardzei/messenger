@@ -8,6 +8,7 @@ urlpatterns = [
     path('verify/', views.EmailVerification.as_view(), name='email_verification'),
     path('resend/', views.ResendVerification.as_view(), name='resend_verifiaction'),
     path('totp/', views.TurnTOTP.as_view(), name='totp'),
+    path('online/', views.UsersOnline.as_view(), name='users_online'),
     re_path(r'^(?P<pk>(\d+|me))/$', views.UserDetail.as_view(), name='user_detail'),
     re_path(r'^change_pwd/(?P<pk>(\d+|me))/$', views.ChangePassword.as_view(), name='user_change_pwd'),
     path('google/callback/', views.GoogleCallback.as_view())
