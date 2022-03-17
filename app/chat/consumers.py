@@ -1,4 +1,5 @@
 import json
+import os
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -77,7 +78,7 @@ class UserConsumer(AsyncWebsocketConsumer):
         self.user_group_name = ''
 
         self.conn = get_redis_connection('default')
-        self.storage = 'cache:users:online'
+        self.storage = os.getenv('CACHE_USERS_ONLINE')
 
     async def connect(self):
         self.user_group_name = f"user_pk_{self.scope['user'].pk}"
