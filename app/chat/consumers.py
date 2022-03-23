@@ -1,7 +1,9 @@
 import json
+import os
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django_redis import get_redis_connection
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -75,6 +77,9 @@ class UserConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.user_group_name = ''
 
+        self.conn = get_redis_connection('default')
+        self.storage = os.getenv('CACHE_USERS_ONLINE')
+
     async def connect(self):
         self.user_group_name = f"user_pk_{self.scope['user'].pk}"
 
@@ -83,6 +88,8 @@ class UserConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+        self.conn.sadd(self.storage, self.scope['user'].pk)
+
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -90,6 +97,8 @@ class UserConsumer(AsyncWebsocketConsumer):
             self.user_group_name,
             self.channel_name
         )
+
+        self.conn.srem(self.storage, self.scope['user'].pk)
 
     async def send_notification(self, event):
         await self.send(text_data=json.dumps({
