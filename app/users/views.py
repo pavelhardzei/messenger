@@ -11,6 +11,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rooms.serializers import EmptySerializer
@@ -55,6 +56,7 @@ class UserSignUp(generics.CreateAPIView):
 class EmailVerification(generics.GenericAPIView):
     schema = AutoSchema(tags=['users'])
     serializer_class = EmptySerializer
+    renderer_classes = (TemplateHTMLRenderer, )
 
     def get(self, request, *args, **kwargs):
         user = get_object_or_404(UserProfile, id=request.query_params['user'])
@@ -62,11 +64,12 @@ class EmailVerification(generics.GenericAPIView):
         token = request.query_params['token']
         if not default_token_generator.check_token(user, token):
             return Response({'message': 'Link is invalid or expired. Please, request another confirmation email'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST, template_name='verification/email_verification.html')
 
         user.is_active = True
         user.save()
-        return Response({'message': 'Email successfully verified'})
+        return Response({'message': 'Email successfully verified, come back to the login page'},
+                        template_name='verification/email_verification.html')
 
 
 class ResendVerification(generics.GenericAPIView):
