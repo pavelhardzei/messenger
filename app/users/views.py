@@ -63,12 +63,14 @@ class EmailVerification(generics.GenericAPIView):
 
         token = request.query_params['token']
         if not default_token_generator.check_token(user, token):
-            return Response({'message': 'Link is invalid or expired. Please, request another confirmation email'},
-                            status=status.HTTP_400_BAD_REQUEST, template_name='verification/email_verification.html')
+            return Response({'message': 'Link is invalid or expired. Please, request another confirmation email',
+                             'state': 'unverified'}, status=status.HTTP_400_BAD_REQUEST,
+                            template_name='verification/email_verification.html')
 
         user.is_active = True
         user.save()
-        return Response({'message': 'Email successfully verified, come back to the login page'},
+        return Response({'message': 'Email successfully verified, come back to the login page',
+                         'state': 'verified'},
                         template_name='verification/email_verification.html')
 
 

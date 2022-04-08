@@ -3,10 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification</title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0">
+    <title>DarkTalk</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        :root {
+            --main-background-color: rgb(22, 23, 25);
+            --card-background-color: rgb(31, 32, 34);
+
+            --main-title-color: rgb(255, 255, 255);
+            --second-title-color: rgb(167, 167, 167);
+
+            --success-color: rgba(110, 207, 151, 1);
+            --success-color-5: rgba(110, 207, 151, 0.5);
+
+            --danger-color: rgb(247, 114, 73);
+            --danger-color-5: rgba(247, 114, 73, 0.5);
+        }
+
+        *,
+        html {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        html {
+            background-color: var(--main-background-color);
+        }
+
+        @keyframes scale {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(-75deg);
+            }
+
+            to {
+                transform: rotate(0);
+            }
+        }
+
+        .page {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .page__card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 32px;
+            border-radius: 16px;
+            background-color: var(--card-background-color);
+            min-width: 300px;
+            min-height: 300px;
+        }
+
+        .page__card_title {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--second-title-color);
+
+            animation-name: scale;
+            animation-duration: 1.5s;
+        }
+
+        .page__card_icon_circle_wrapper {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            padding: 32px;
+            margin-bottom: 32px;
+            animation-name: scale;
+            animation-duration: 0.75s;
+        }
+
+        .page__card_icon_circle {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation-name: scale;
+            animation-duration: 1s;
+        }
+
+        .page__card_icon_circle_wrapper.page--success {
+            background-color: var(--success-color-5);
+        }
+
+        .page__card_icon_circle_wrapper.page--success .page__card_icon_circle {
+            background-color: var(--success-color);
+        }
+
+        .page__card_icon_circle_wrapper.page--error {
+            background-color: var(--danger-color-5);
+        }
+
+        .page__card_icon_circle_wrapper.page--error .page__card_icon_circle {
+            background-color: var(--danger-color);
+        }
+
+        .page__card_icon_circle svg {
+            fill: var(--main-title-color);
+            width: 60%;
+            height: 60%;
+
+            animation-name: rotate;
+            animation-duration: 1.5s;
+        }
+
+        .page__card_icon_circle_wrapper.page--error svg {
+            fill: var(--main-background-color);
+            stroke: var(--main-background-color);
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ message }}</h1>
+    <div class="page">
+        {% if state == "verified" %}
+        <div class="page__card">
+            <div class="page__card_icon_circle_wrapper page&#45;&#45;success">
+                <div class="page__card_icon_circle">
+                    <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M6.47 11.35l7.94-8.382c.57-.6 1.52-.627 2.122-.057.6.57.627 1.52.057 2.123l-9 9.5-.016.014-.014.015c-.58.582-1.52.586-2.106.015l-.02-.02-3.995-3.994c-.587-.585-.587-1.535 0-2.12.584-.586 1.534-.586 2.12 0l2.91 2.91z"
+                            fill-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+            <h2 class="page__card_title">
+                {{ message }}
+            </h2>
+        </div>
+        {% else %}
+        <div class="page__card">
+            <div class="page__card_icon_circle_wrapper page--error">
+                <div class="page__card_icon_circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </div>
+            </div>
+            <h2 class="page__card_title">
+                {{ message }}
+            </h2>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
