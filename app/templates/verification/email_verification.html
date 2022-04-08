@@ -14,6 +14,9 @@
 
             --main-title-color: rgb(255, 255, 255);
             --second-title-color: rgb(167, 167, 167);
+            --third-title-color: rgb(167, 167, 167, 0.7);
+
+            --primary-color: rgb(67, 160, 255);
 
             --success-color: rgba(110, 207, 151, 1);
             --success-color-5: rgba(110, 207, 151, 0.5);
@@ -137,6 +140,27 @@
             fill: var(--main-background-color);
             stroke: var(--main-background-color);
         }
+
+        .page__card_link {
+            margin-top: 40px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: right;
+            color: var(--third-title-color);
+            transition: color 0.5s;
+            line-height: 18px;
+
+
+            animation-name: scale;
+            animation-duration: 1.5s;
+        }
+
+        .page__card_link:hover {
+            color: var(--primary-color);
+            transition: fill 0.5s;
+        }
     </style>
 </head>
 <body>
@@ -153,8 +177,9 @@
                 </div>
             </div>
             <h2 class="page__card_title">
-                {{ message }}
+                Successful <br> email confirmation
             </h2>
+            <a href="{{ redirect }}" class="page__card_link">Back to login &#8594;</a>
         </div>
         {% else %}
         <div class="page__card">
@@ -168,8 +193,10 @@
                 </div>
             </div>
             <h2 class="page__card_title">
-                {{ message }}
+                Error email confirmation <br>
+                Please, try again
             </h2>
+            <a href="{{ redirect }}" class="page__card_link">Back to login &#8594;</a>
         </div>
         {% endif %}
     </div>
