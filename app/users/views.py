@@ -25,6 +25,7 @@ from users.serializers import (PasswordSerializer, ResendVerificationSerializer,
 
 
 class GoogleLogin(SocialLoginView):
+    schema = AutoSchema(tags=['users'])
     adapter_class = GoogleOAuth2Adapter
 
     def get_serializer(self, *args, **kwargs):
