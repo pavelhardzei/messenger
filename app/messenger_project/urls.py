@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from allauth.socialaccount.providers.google import views as google_views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -26,7 +25,5 @@ urlpatterns = [
     path('openapi/', get_schema_view(title='Messenger', public=True), name='openapi_schema'),
     path('swagger/', TemplateView.as_view(template_name='openapi/swagger.html',
                                           extra_context={'schema_url': 'openapi_schema'}), name='swagger'),
-    path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('google/auth/', google_views.oauth2_login)
+    path('admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,14 +1,15 @@
 import os
 
 import pyotp
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from base.utils import check
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.shortcuts import HttpResponseRedirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django_redis import get_redis_connection
+from rest_auth.registration.views import SocialLoginView
 from rest_framework import generics, permissions, status
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -23,19 +24,13 @@ from users.serializers import (PasswordSerializer, ResendVerificationSerializer,
                                UsersOnlineDictSerializer, UserTokenSerializer)
 
 
-class GoogleCallback(generics.GenericAPIView):
-    schema = AutoSchema(tags=['users'])
-    serializer_class = EmptySerializer
-    authentication_classes = (SessionAuthentication, )
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
 
-    def get(self, request, *args, **kwargs):
-        if request.user.is_anonymous:
-            return Response({'message': 'Authorize via google'})
-
-        token, _ = Token.objects.get_or_create(user=request.user)
-        request.session.clear()
-
-        return HttpResponseRedirect(f"{os.getenv('FRONTEND_REDIRECT')}?token={token.key}")
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
 
 
 class UserSignUp(generics.CreateAPIView):
