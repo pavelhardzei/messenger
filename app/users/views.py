@@ -2,6 +2,7 @@ import os
 
 import pyotp
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from base.utils import check
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
@@ -27,6 +28,7 @@ from users.serializers import (PasswordSerializer, ResendVerificationSerializer,
 class GoogleLogin(SocialLoginView):
     schema = AutoSchema(tags=['users'])
     adapter_class = GoogleOAuth2Adapter
+    client_class = OAuth2Client
 
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
