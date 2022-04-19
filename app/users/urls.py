@@ -11,5 +11,5 @@ urlpatterns = [
     path('online/', views.UsersOnline.as_view(), name='users_online'),
     re_path(r'^(?P<pk>(\d+|me))/$', views.UserDetail.as_view(), name='user_detail'),
     re_path(r'^change_pwd/(?P<pk>(\d+|me))/$', views.ChangePassword.as_view(), name='user_change_pwd'),
-    path('google/callback/', views.GoogleCallback.as_view())
+    path('sociallogin/', views.GoogleLogin.as_view(), name='sociallogin')
 ]
